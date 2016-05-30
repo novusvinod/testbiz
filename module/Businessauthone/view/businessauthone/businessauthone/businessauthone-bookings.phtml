@@ -1,0 +1,429 @@
+<?php if(isset($_COOKIE['success'])) { ?>
+    <div class="alert alert-success alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <?php echo $_COOKIE['success'] ?>
+    </div>
+<?php } ?>
+
+<?php
+    $bookingsData = json_decode($this->bookings, true);
+    // var_dump($bookingsData);
+    if(isset($bookingsData['response'])){
+        $bookingsCount = count($bookingsData['response']['Bookings']);
+    }
+    else{
+        $bookingsCount = 0;
+    }
+
+?>
+
+<?php echo $this->mess ;?>
+
+<div id="my_table">
+    <!-- <div style="float:left; width:300px; margin-left:500px;">
+        <a href="/download/authones"><button class="btn btn-success btn-block">Download All data as Excel Sheet</button></a>
+    </div> -->
+        
+        <div style="margin-left:600px; font-weight:bold; font-size:25px;"> ACTIVE BOOKINGS</div>
+
+    <div class="row" style="padding-top:30px">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"></h3>
+                    <div class="box-tools">
+                        <div class="input-group">
+                            <!--<button class="btn btn-sm btn-default" style="margin-left:5px; margin-top:7px"
+                            id="accept_all_button">Accept All Selected</button>
+                            <button class="btn btn-sm btn-default" style="margin-left:5px; margin-top:7px"
+                            id="reject_all_button">Reject All Selected</button>-->
+                        </div>
+                    </div>
+                </div><!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-striped table-bordered datatable" id="table_booking">
+                        <thead>
+                            <tr style="width:100%; font-size:12px">
+                                <th style="width:2%" class="text-center"></th>
+                                <th style="width:3%" class="text-center">ID</th>
+                                <th style="width:3%; text-align:center" >Tour Type</th>
+                                <th style="width:12%; text-align:center" >Pickup Location</th>
+                                <th style="width:12%; text-align:center" >Drop Location</th>
+                                <th style="width:15%; text-align:center" >Booking DateTime</th>
+                                <th style="width:15%; text-align:center" >Pickup DateTime</th>
+                                <th style="width:5%; text-align:center" >Spoc Id/Name</th>
+                                <th style="width:9%; text-align:center" >Taxivaxi Status</th>
+                                <th style="width:9%; text-align:center">Approver Status</th>
+                                <th style="width:9%; text-align:center">Accepted/ Rejected By</th>
+                                <th style="width:1%; text-align:center" >Accept</th>
+                                <th style="width:1%; text-align:center" >Reject</th>
+                                <th style="width:2%; text-align:center" >Invoice</th>
+                                <th style="width:2%; text-align:center" >Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php for($i=0; $i<$bookingsCount; $i++){ 
+                                if($bookingsData['response']['Bookings'][$i]['status_user'] == '1' &&
+                                   $bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] != '2'){
+                                ?>
+                            <tr style="font-size:12px; cursor:pointer" class="my_row" id="<?php echo $bookingsData['response']['Bookings'][$i]['id'] ?>">
+
+                                <?php if($bookingsData['response']['Bookings'][$i]['is_invoice'] != 1 &&
+                                        $bookingsData['response']['Bookings'][$i]['status_auth2'] == '0') {?>
+                                <td><input type="checkbox" name="multiple_select" id="<?php echo $bookingsData['response']['Bookings'][$i]['id'].'_ms' ; ?>"></td>
+                                <?php }else{ ?>
+                                <td></td>
+                                <?php } ?>
+
+                                <td><?php echo $bookingsData['response']['Bookings'][$i]['reference_no'] ?></td>
+
+                                <td style="text-align:center">
+                                    <?php if($bookingsData['response']['Bookings'][$i]['tour_type'] == '0'){ ?>
+                                        Radio
+                                    <?php }elseif ($bookingsData['response']['Bookings'][$i]['tour_type'] == '1') { ?>
+                                        Local
+                                    <?php }else{ ?>
+                                        Outstation
+                                    <?php }?>
+                                </td>
+                                <td style="text-align:center"><?php echo substr($bookingsData['response']['Bookings'][$i]['pickup_location'], 0, 20); ?></td>
+                                <td style="text-align:center">
+                                    <?php if($bookingsData['response']['Bookings'][$i]['tour_type'] == '2') { echo $bookingsData['response']['Bookings'][$i]['drop_city_name']; } else{ echo substr($bookingsData['response']['Bookings'][$i]['drop_location'], 0, 20); } ?>
+                                </td>
+                                <td class="center"><?php echo date("d M Y - h:i a", strtotime($bookingsData['response']['Bookings'][$i]['created'])); ?></td>
+                                <td class="center"><?php echo date("d M Y - h:i a", strtotime($bookingsData['response']['Bookings'][$i]['pickup_datetime'])); ?></td>
+                                <td style="text-align:center"><?php echo $bookingsData['response']['Bookings'][$i]['user_cid']."/". $bookingsData['response']['Bookings'][$i]['user_name'] ;?></td>
+                                <td style="text-align:center">
+                                    <?php if($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '0'){ ?>
+                                        <p style="color:orange"><i class="fa fa-circle green" style="margin-right:1px"></i>Pending</p>
+                                    <?php }elseif ($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '1') { ?>
+                                        <p style="color:blue"><i class="fa fa-circle green" style="margin-right:1px"></i>Accepted</p>
+                                    <?php }elseif ($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '2') { ?>
+                                        <p style="color:red"><i class="fa fa-circle green" style="margin-right:1px"></i>Rejected</p>
+                                    <?php }else{?>
+                                        <p style="color:green"><i class="fa fa-circle green" style="margin-right:1px"></i>Assigned</p>
+                                    <?php }?>
+                                </td>
+                                <td style="text-align:center">
+                                    <?php if(
+                                         $bookingsData['response']['Bookings'][$i]['status_auth2'] == '0' &&
+                                         $bookingsData['response']['Bookings'][$i]['status_auth1'] == '0'){ ?>
+                                        <p style="color:orange"><i class="fa fa-circle green" style="margin-right:1px"></i>Pending</p>
+                                    <?php }elseif (
+                                        $bookingsData['response']['Bookings'][$i]['status_auth2'] == '1' ||
+                                        $bookingsData['response']['Bookings'][$i]['status_auth1'] == '1') { ?>
+                                        <p style="color:blue"><i class="fa fa-circle green" style="margin-right:1px"></i>Accepted</p>
+                                    <?php }else{ ?>
+                                        <p style="color:red"><i class="fa fa-circle green" style="margin-right:1px"></i>Rejected</p>
+                                    <?php }?>
+                                </td>
+                                <td style="text-align:center">
+                                    <?php if(
+                                         $bookingsData['response']['Bookings'][$i]['status_auth2'] == '0' &&
+                                         $bookingsData['response']['Bookings'][$i]['status_auth1'] == '0'){ ?>
+                                        <p style="color:orange"></p>
+                                    <?php }elseif (
+                                        $bookingsData['response']['Bookings'][$i]['status_auth2'] == '1' ||
+                                        $bookingsData['response']['Bookings'][$i]['status_auth1'] == '1') { ?>
+                                        <p style="color:blue">
+                                            <?php if($bookingsData['response']['Bookings'][$i]['status_auth2'] == '1') {?>
+                                                Approver 2
+                                            <?php }else{ ?>
+                                                Approver 1
+                                            <?php } ?>
+                                        </p>
+                                    <?php }else{ ?>
+                                        <p style="color:red">
+                                            <?php if($bookingsData['response']['Bookings'][$i]['status_auth2'] == '2') {?>
+                                                Approver 2
+                                            <?php }else{ ?>
+                                                Approver 1
+                                            <?php } ?>
+                                        </p>
+                                    <?php }?>
+                                </td>
+
+                                <td class="right" style="text-align:center">
+                                    <!-- This is this approver has made some operations -->
+                                    <?php if(
+                                    (
+                                        $bookingsData['response']['Bookings'][$i]['status_auth2'] == '0' &&
+                                        $bookingsData['response']['Bookings'][$i]['status_auth1'] != '1'
+                                    )
+                                    ){?>
+                                    <?php $l = $bookingsData['response']['Bookings'][$i]['id']; ?>
+                                    <a id="accept_group_button" style="" class=" fa-trash" onclick="Confirm.render('Accept this Booking?', ' \/authonebooking\/accept\/<?php echo $l ?> ');">
+                                        <i class="glyphicon glyphicon-ok icon-green"></i>
+                                    </a>
+                                    <?php } ?>
+                                </td>
+
+                                <td class="right" style="text-align:center">
+                                    <?php $l = $bookingsData['response']['Bookings'][$i]['id']; ?>
+                                    <!-- This is this approver has made some operations -->
+                                    <?php if(
+                                    (
+                                        $bookingsData['response']['Bookings'][$i]['status_auth2'] == '0' &&
+                                        $bookingsData['response']['Bookings'][$i]['status_auth1'] != '2'
+                                    )
+                                    ){?>
+                                    <?php if(($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '1' || $bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '3') && $bookingsData['response']['Bookings'][$i]['is_invoice'] == '0' && $bookingsData['response']['Bookings'][$i]['status_auth1'] != '2' ) {?>
+                                    <a id="reject_group_button" style="" class=" fa-trash" onclick="Confirm.render('Are you sure you want to reject this booking? The current cancellation shall have cancellation charges as per applicable terms.', ' \/authonebooking\/rejectreason\/<?php echo $l ?> ');">
+                                        <i class="glyphicon glyphicon-remove icon-green"></i>
+                                    </a>
+                                    <?php } ?>
+                                    <?php if($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] != '1' && $bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] != '3' && $bookingsData['response']['Bookings'][$i]['is_invoice'] == '0' && $bookingsData['response']['Bookings'][$i]['status_auth1'] != '2' ) { ?>
+                                    <a id="reject_group_button" style="" class=" fa-trash" onclick="Confirm.render('Are you sure you want to reject this booking?', ' \/authonebooking\/rejectreason\/<?php echo $l ?> ');">
+                                        <i class="glyphicon glyphicon-remove icon-green"></i>
+                                    </a>
+                                    <?php } ?>
+                                    <?php } ?>
+                                </td>
+
+                                <td class="right" style="text-align:center">
+                                    <?php if($bookingsData['response']['Bookings'][$i]['is_invoice'] == '1') { ?>
+                                    <a id="viewinvoice_group_button" style="margin-left:40px;" class=" fa-trash" href="<?php if($bookingsData['response']['Bookings'][$i]['tour_type'] == '0'){
+                                        echo '/businessauthone/viewInvoiceRadio/'.$bookingsData['response']['Bookings'][$i]['invoice_id'];} else {
+                                            echo '/businessauthone/viewInvoiceOutstation/'.$bookingsData['response']['Bookings'][$i]['invoice_id']; }?>">
+                                        <i class="glyphicon glyphicon-list-alt icon-green"></i>
+                                    </a>
+                                    <?php } ?>
+                                </td>
+
+                                <td class="right" style="text-align:center">
+                                    <?php $l = $bookingsData['response']['Bookings'][$i]['id']; ?>
+                                    <a id="viewbooking_group_button"  class="fa-trash" href="/businessauthone/viewBooking/<?php echo $l ; ?>">
+                                        <i class="glyphicon glyphicon-search icon-white"></i>
+                                    </a>
+                                </td>
+
+                                <input type="hidden" name="status_auth_taxivaxi" id="status_auth_taxivaxi" value="<?php echo $bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi']; ?>">
+
+                                <input type="hidden" name="status_auth2" id="status_auth2" value="<?php echo $bookingsData['response']['Bookings'][$i]['status_auth2']; ?>">
+
+                                <input type="hidden" name="status_auth1" id="status_auth1" value="<?php echo $bookingsData['response']['Bookings'][$i]['status_auth1']; ?>">
+
+                                <input type="hidden" name="is_invoice" id="is_invoice" value="<?php echo $bookingsData['response']['Bookings'][$i]['is_invoice']; ?>">
+
+                            </tr>
+                            <?php } }?>
+                        </tbody>
+                    </table>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    $('#table_booking').DataTable({
+        'paging': true,
+        'aaSorting' : [],
+        "columns": [
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"}
+            ]
+    });
+
+    $('#add_group_form').hide();
+    $('#edit_group_form').hide();
+
+
+    $('a').click(function(){
+        $('#my_table').show();
+        $('#add_group_form').hide();
+        $('#edit_group_form').hide();
+    });
+
+    $('#add_group_button').click(function(){
+        $('#my_table').hide();
+        $('#edit_group_form').hide();
+
+        $('#group_name').val('');
+        $('#budget').val();
+        $('#auth_name').val();
+        $('#auth_email').val();
+        $('#auth_password').val();
+        $('#is_radio').attr('checked', false);
+        $('#is_outstation').attr('checked', false);
+        $('#add_group_form').show();
+    });
+
+    $('#cancel_group_button, #cancel_group_button2').click(function(){
+        $('#my_table').show();
+        $('#add_group_form').hide();
+        $('#edit_group_form').hide();
+    });
+
+    $('#r').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_radio_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_radio_extra').val('Yes');
+        }
+    });
+
+    $('#l').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_local_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_local_extra').val('Yes');
+        }
+    });
+
+    $('#o').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_outstation_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_outstation_extra').val('Yes');
+        }
+    });
+
+    $('.my_row').click(function(){
+    });
+
+
+    //For Accept Button
+    /*$('.my_row').mouseover(function(){
+        //If already accepted, no need to show again
+        if($(this).find('#status_auth1').val() != '1')
+        {
+            $(this).find('#accept_group_button').show();
+        }
+    });
+
+    $('.my_row').mouseout(function(){
+        $(this).find('#accept_group_button').hide();
+    });*/
+
+    //For Reject Button
+    /*$('.my_row').mouseover(function(){
+        //If accepted by auth2, cannot reject and if alredy rejected , no need to show again 
+        if($(this).find('#status_auth2').val() != '1' && $(this).find('#status_auth1').val() != '2' )  
+        {
+            $(this).find('#reject_group_button').show();
+        }
+    });
+
+    $('.my_row').mouseout(function(){
+        $(this).find('#reject_group_button').hide();
+    });*/
+
+    //View Invoice Button
+    /*$('.my_row').mouseover(function(){
+        if($(this).find('#is_invoice').val() == '1')
+        {
+            $(this).find('#viewinvoice_group_button').show();
+        }
+    });
+
+    $('.my_row').mouseout(function(){
+        $(this).find('#viewinvoice_group_button').hide();
+    });*/
+
+    //For Accept All Button
+    $('#accept_all_button').click(function () {
+        arr_accept_ids=[];
+        
+        $("input:checkbox").each(function(){
+            var $this = $(this);
+
+            if($this.is(":checked")){
+                arr_accept_ids.push($this.attr("id").split("_")[0]);
+            }
+        });
+
+        var len = arr_accept_ids.length ;
+        var at = '<?php echo $_COOKIE["access_token_business_authone"] ; ?>';
+
+        for(i=0; i<len; i++)
+        {
+            jQuery.ajax({
+                        url: 'http://taxivaxi.in/business/api/acceptAuthoneBooking',
+                        type: 'post',
+                        data: {
+                            access_token: at,
+                            booking_id: arr_accept_ids[i]
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function(data)
+                        {
+                        }
+                    });
+        }
+        setTimeout(function(){ location.reload(); }, 1000);
+    });
+
+    //For Reject All Button
+    $('#reject_all_button').click(function () {
+        arr_reject_ids=[];
+        
+        $("input:checkbox").each(function(){
+            var $this = $(this);
+
+            if($this.is(":checked")){
+                arr_reject_ids.push($this.attr("id").split("_")[0]);
+            }
+        });
+
+        var len = arr_reject_ids.length ;
+        var at = '<?php echo $_COOKIE["access_token_business_authone"] ; ?>';
+
+        for(i=0; i<len; i++)
+        {
+            jQuery.ajax({
+                        url: 'http://taxivaxi.in/business/api/rejectAuthoneBooking',
+                        type: 'post',
+                        data: {
+                            access_token: at,
+                            booking_id: arr_reject_ids[i]
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function(data)
+                        {
+                        }
+                    });
+        }
+        setTimeout(function(){ location.reload(); }, 1000);
+    });
+    
+});
+</script>
+

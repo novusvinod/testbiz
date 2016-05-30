@@ -1,0 +1,217 @@
+<?php if(isset($_COOKIE['success'])) { ?>
+    <div class="alert alert-success alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <?php echo $_COOKIE['success'] ?>
+    </div>
+<?php } ?>
+<?php if(isset($_COOKIE['fail'])) { ?>
+    <div class="alert alert-danger alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <?php echo $_COOKIE['fail'] ?>
+    </div>
+<?php } ?>
+
+<?php
+    $bookingsData = json_decode($this->bookings, true);
+    
+    if(isset($bookingsData['response'])){
+        $bookingsCount = count($bookingsData['response']['Bookings']);
+    }
+    else{
+        $bookingsCount = 0;
+    }
+
+?>
+
+<?php echo $this->mess ;?>
+
+<div id="my_table">
+    <div style="text-align:center; font-weight:bold; font-size:18px;">
+        <?php if($type=='1'){echo 'New Taxi Invoices:Unbilled';} elseif($type=='2') echo 'Taxi Invoices:Cleared for billing'; elseif($type=='3') echo 'Taxi Invoices:Corrections/Comments requested by Admin'; elseif($type=='4') echo 'Billed Taxi Invoices:Unpaid'; elseif($type=='5') echo 'Paid Taxi Invoices'; elseif($type=='6') echo 'Taxi Invoices:Cleared for billing by Admin'; ?>
+    </div>
+    <!--<div style="margin-left:470px; font-weight:bold; font-size:25px;"></div>-->
+
+    <div class="row" style="padding-top:30px">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"></h3>
+                </div><!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-striped table-bordered datatable" id="table_booking">
+                        <thead>
+                            <tr style="width:100%; font-size:12px">
+                                <th style="width:5%"> Booking ID</th>
+                                <?php if($type == '4' || $type == '5'){ ?>
+                                    <th style="width:5%">Bill ID</th>
+                                <?php } ?>
+                                <th style="width:10%;" >Booking DateTime</th>
+                                <th style="width:10%;" >Pickup DateTime</th>
+                                <th style="width:5%; " >Tour Type</th>
+                                <th style="width:20%;" >Pickup Location</th>
+                                <th style="width:5%;" >View<br>Invoice</th>
+                                <?php if($type == '1') { ?>
+                                    <th style="width:5%;">Clear for<br>Billing</th>
+                                    <!-- <th style="width:10%;">Correction/<br>Revision Needed</th> -->
+                                <?php } ?>
+                                <?php if($type == '3') { ?>
+                                    <th style="width:6%;">Requested<br>By</th>
+                                    <!-- <th style="width:6%;">Clear for<br>Billing</th> -->
+                                    <th style="width:12%;">Admin<br>Comment</th>
+                                    <th style="width:12%;">Taxivaxi<br>Comment</th>
+                                <?php } ?>
+                                <!--<?php if($type == '2') { ?>
+                                    <th style="width:12%;">Cleared By</th>
+                                <?php } ?> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php for($i=0; $i<$bookingsCount; $i++){ ?>
+                            <tr style="font-size:12px; cursor:pointer" class="my_row" id="<?php echo $bookingsData['response']['Bookings'][$i]['id'] ?>">
+                                <td><?php echo $bookingsData['response']['Bookings'][$i]['reference_no'] ?></td>
+                                <?php if($type == '4' || $type == '5'){ ?>
+                                <td style="text-align:left">
+                                    
+                                        <?php echo $bookingsData['response']['Bookings'][$i]['corporate_code']."BILL".str_pad($bookingsData['response']['Bookings'][$i]['bill_id'], 4, "0", STR_PAD_LEFT); ?>
+                                    
+                                </td>
+                                <?php } ?>
+                                <td style="text-align:left"><?php echo date("d M Y - h:i a", strtotime($bookingsData['response']['Bookings'][$i]['created'])); ?></td>
+                                <td style="text-align:left"><?php echo date("d M Y - h:i a", strtotime($bookingsData['response']['Bookings'][$i]['pickup_datetime'])); ?></td>
+                                <td style="text-align:left">
+                                    <?php if($bookingsData['response']['Bookings'][$i]['tour_type'] == '0'){ ?>
+                                        Radio
+                                    <?php }elseif ($bookingsData['response']['Bookings'][$i]['tour_type'] == '1') { ?>
+                                        Local
+                                    <?php }else{ ?>
+                                        Outstation
+                                    <?php }?>
+                                </td>
+                                <td style="text-align:left"><?php echo substr($bookingsData['response']['Bookings'][$i]['pickup_location'], 0, 100); ?></td>
+                                <td style="text-align:center">
+                                    <?php if($bookingsData['response']['Bookings'][$i]['is_invoice'] == '1'){ ?>
+                                    <a id="viewinvoice_group_button" href="<?php if($bookingsData['response']['Bookings'][$i]['tour_type'] == '0'){
+                                        echo '/businessspoc/viewInvoiceRadio/'.$bookingsData['response']['Bookings'][$i]['invoice_id'];} else {
+                                            echo '/businessspoc/viewInvoiceOutstation/'.$bookingsData['response']['Bookings'][$i]['invoice_id']; }?>">
+                                        <i class="glyphicon glyphicon-search icon-white"></i>
+                                    </a>
+                                    <?php } ?>
+                                </td>
+                                <?php if($type == '1') { ?>
+                                    <td>
+                                        <a id="clear_invoice_button" href="<?php echo '/businessspoc/clearInvoice/'.$bookingsData['response']['Bookings'][$i]['invoice_id']."/1"; ?>">
+                                            Approve
+                                        </a> 
+                                    </td>
+                                    <!-- <td>
+                                        <a href="/businessspoc/getComment/<?php echo $bookingsData['response']['Bookings'][$i]['invoice_id']?>/1">
+                                            Add comment
+                                        </a>
+                                    </td>  -->
+                                <?php } ?>
+                                <?php if($type == '3') { ?>
+                                    <th style="width:12%;"><?php echo $bookingsData['response']['Bookings'][$i]['rejected_by']; ?></th>
+                                    <!-- <td>
+                                        <a id="clear_invoice_button" href="<?php echo '/businessspoc/clearInvoice/'.$bookingsData['response']['Bookings'][$i]['invoice_id']."/3"; ?>">
+                                            Approve
+                                        </a> 
+                                    </td> -->
+                                    <td><?php echo $bookingsData['response']['Bookings'][$i]['invoice_comment_client']; ?></td>
+                                    <td><?php echo $bookingsData['response']['Bookings'][$i]['invoice_comment_taxivaxi']; ?></td>
+                                <?php } ?>
+                                <!--<?php if($type == '2') { ?>
+                                    <th style="width:12%;"><?php echo $bookingsData['response']['Bookings'][$i]['accepted_by']; ?></th>
+                                <?php } ?>-->
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    var type = '<?php echo $this->type; ?>';
+
+    if(type == 1)
+    {
+        $('#table_booking').DataTable({
+            'paging': true,
+            'aaSorting' : [],
+            "stateSave": true,
+            "columns": [
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    // {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"}
+                ]
+        });
+    }
+    else if(type == 3)
+    {
+        $('#table_booking').DataTable({
+            'paging': true,
+            'aaSorting' : [],
+            "stateSave": true,
+            "columns": [
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    // {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"}
+                ]
+        });
+    }
+    else if(type == 2)
+    {
+        $('#table_booking').DataTable({
+            'paging': true,
+            'aaSorting' : [],
+            "stateSave": true,
+            "columns": [
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    // {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"}
+                ]
+        });   
+    }
+    else
+    {
+        $('#table_booking').DataTable({
+            'paging': true,
+            'aaSorting' : [],
+            "stateSave": true,
+            "columns": [
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"}
+                ]
+        });
+    }
+
+});
+</script>
+

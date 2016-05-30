@@ -1,0 +1,1679 @@
+<?php 
+    //echo $this->inlineScript()->appendFile('/js/jquery.validate.min.js')->appendFile('/js/jquery-ui.js')->appendFile('/js/additional-methods.min.js');
+
+    $citiesData = json_decode($this->cities, true);
+    $citiesCount = count($citiesData['response']['Cities']);
+
+    $taxitypesData = json_decode($this->taxitypes, true);
+    $taxitypesCount = count($taxitypesData['response']['TaxiTypes']);
+
+    $employeesData = json_decode($this->employees, true);
+    if(isset($employeesData['response'])){
+        $employeesCount = count($employeesData['response']['People']);
+    }
+    else{
+        $employeesCount = 0;
+    }
+
+    $codeData = json_decode($this->ass_codes, true);
+    if(isset($codeData['response'])){
+        $codeCount = count($codeData['response']['AssCodes']);
+    }
+    else{
+        $codeCount = 0;
+    }
+
+    // var_dump($this->ass_codes);
+
+?>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+<?php if(isset($_COOKIE['error'])) { ?>
+
+        <div class="box-content alerts" style="width:400px; margin:0 auto;">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong><?php echo $_COOKIE['error'] ?></strong>
+                </div>
+            </div>
+
+
+    <?php } ?>
+
+<?php echo $this->mess ; ?>
+
+    <style>fieldset { overflow:hidden }
+.some-class { float:left; clear:none; }
+label { float:left; clear:none; display:block; padding: 2px 1em 0 0; }
+input[type=radio], input.radio { float:left; clear:none; margin: 2px 0 0 2px; }
+input[type=checkbox], input.checkbox { float:left; clear:none; margin: 2px 0 0 2px; }
+</style>
+
+<div class="row" style="margin-left:200px; margin-right:200px">
+    <div class="box col-md-12">
+        <div class="box-inner" style="margin-left:120px; margin-right:100px;margin-bottom:20px">
+            <div class="box-header" data-original-title="">
+                <h5 class="box-title"> Form New Booking</h5>
+            </div>
+            <div class="box-content">
+
+                    <div class="form-group">
+                        <label for="name">Tour Type</label><br>
+                        <fieldset>
+                          <div class="some-class">
+                            <?php if($_COOKIE['is_radio_business_spoc'] == '1') { ?>
+                            <input checked type="radio" class="radio" name="tour_type" value="0" id="Radio" />
+                            <label for="y">Radio</label>
+                            <?php } ?>
+                            <?php if($_COOKIE['is_local_business_spoc'] == '1') { ?>
+                            <input  type="radio" class="radio" name="tour_type" value="1" id="Local" />
+                            <label for="y">Local</label>
+                            <?php } ?>
+                            <?php if($_COOKIE['is_outstation_business_spoc'] == '1') { ?>
+                            <input type="radio" class="radio" name="tour_type" value="2" id="Outstation" />
+                            <label for="y">Outstation</label>
+                            <?php } ?>
+                            <?php if($_COOKIE['is_bus_business_spoc'] == '1') { ?>
+                            <input type="radio" class="radio" name="tour_type" value="3" id="Bus" />
+                            <label for="y">Bus</label>
+                            <?php } ?>
+                          </div>
+                        </fieldset>
+                    </div>
+
+                    <div id="r">
+                        <form id="add-operator-form" role="form" action="/postAddBooking" method="POST">
+                            <input type="hidden" name="tour_type" value="0">
+                            
+                            <input type="hidden" name="is_local" value="0">
+                            <input type="hidden" name="admin_id" value="<?php echo intval($_COOKIE['admin_id_business_spoc']); ?>">
+                            <input type="hidden" name="group_id" value="<?php echo intval($_COOKIE['group_id_business_spoc']); ?>">
+                            <input type="hidden" name="subgroup_id" value="<?php echo intval($_COOKIE['subgroup_id_business_spoc']); ?>">
+                            <input type="hidden" name="city_id" value="NULL">
+
+                            <div class="form-group" style="clear:left;"><br>
+                                <label for="pickup_location">Pickup Location *</label>
+                                <input type="text" class="form-control" name="pickup_location" id="pickup_location3" placeholder="Pickup Location">
+                            </div>
+
+                            <div class="form-group" style="clear:left;">
+                                <label for="drop_location">Drop Location *</label>
+                                <input type="text" class="form-control" name="drop_location" id="drop_location3" placeholder="Drop Location">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pickup_location">Pickup Date and Time *</label>
+                                <input type="text" class="form-control" name="pickup_datetime" id="pickup_datetime3" placeholder="Pickup Time">
+                            </div>
+
+                            <input type="hidden" name="rate_id" value="NULL">
+
+                            <input type="hidden" name="taxi_type_id" value="NULL">
+
+                            <input type="hidden" name="days" value="NULL">
+
+                            <input type="hidden" name="drop_city_id" value="NULL">
+
+                            <div class="form-group">
+                                <label for="pickup_location">No of Passengers *</label>
+                                <select name="no_of_seats" id="no_of_seats_r" data-rel="chosen" required style="width:50px;">
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+
+                            <div id="r_e_1" style="border:1px solid black; padding:10px 10px 5px 10px" class="sel_div">
+                                <label for="group_name">Employee 1</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee Name/Employee ID</p>
+                                        <select name="employee_id_1" id="employee_id_1" data-rel="chosen" class="form-control js-basic-single emp1"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_1" id="employee_contact_1" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_1" id="employee_cid_1" placeholder="Employee Id" required>
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_1" id="employee_name_1" placeholder="Name" required>
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control" 
+                                    name="employee_contact_1" id="employee_contact_1" placeholder="Contact No" required type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+
+                                <div class="form-group"  style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="email" class="form-control" name="employee_email_1" id="employee_email_1" placeholder="Email" required>
+                                </div> -->
+                            </div>
+
+                            <div id="r_e_2" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 2</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_2" id="employee_id_2" data-rel="chosen" class="form-control js-basic-single emp2"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_2" id="employee_contact_2" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_2" id="employee_cid_2" placeholder="Employee Id" value="" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_2" id="employee_name_2" placeholder="Name" value="" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input class="form-control" name="employee_contact_2" id="employee_contact_2" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" value="" style="width:72%; float:left; margin-left:2px">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px" >
+                                    <input type="email" class="form-control" name="employee_email_2" id="employee_email_2" placeholder="Email" value="">
+                                </div> -->
+                            </div>
+
+                            <div id="r_e_3" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 3</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_3" id="employee_id_3" data-rel="chosen" class="form-control js-basic-single emp3"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_3" id="employee_contact_3" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_3" id="employee_cid_3" placeholder="Employee Id" value="" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_3" id="employee_name_3" placeholder="Name" value="" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input class="form-control" name="employee_contact_3" id="employee_contact_3" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" value="" style="width:72%; float:left; margin-left:2px">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="email" class="form-control" name="employee_email_3" id="employee_email_3" placeholder="Email"  value="">
+                                </div> -->
+                            </div>
+
+                            <div id="r_e_4" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 4</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_4" id="employee_id_4" data-rel="chosen" class="form-control js-basic-single emp4"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control" class="emp_con"
+                                    name="employee_contact_4" id="employee_contact_4" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group"  style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_4" id="employee_cid_4" placeholder="Employee Id"  value="">
+                                </div>
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_4" id="employee_name_4" placeholder="Name" value="" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input class="form-control" name="employee_contact_4" id="employee_contact_4" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" value="" style="width:72%; float:left; margin-left:2px">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="email" class="form-control" name="employee_email_4" id="employee_email_4" placeholder="Email" value="" >
+                                </div> -->
+                            </div>
+
+                            <br><br>
+                            <?php if($_COOKIE['has_assessment_codes_business_spoc'] == '1') {?>
+                            <div class="form-group">
+                                <label for="pickup_location">Assessment Code *</label>
+                                <select class="form-control js-basic-single" name="ass_code" id="ass_code3">
+                                    <?php for($x=0; $x<$codeCount; $x++){ ?>
+                                        <option value="<?php echo $codeData['response']['AssCodes'][$x]['assessment_code'] ?>"><?php echo $codeData['response']['AssCodes'][$x]['assessment_code']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <?php }else{ ?>
+                                <input type="hidden" name="ass_code" value=" ">
+                            <?php } ?>
+
+                            <div class="form-group">
+                                <label for="pickup_location">Reason for Booking/ Details of Co-Passengers *</label>
+                                <textarea rows="4" cols="50" class="form-control" name="reason_booking" id="reason_booking3" maxlength="1500"></textarea>
+                            </div>
+
+                            <button type="submit" onclick="return checkRequiredFields()" class="btn btn-warning">
+                                <?php if($_COOKIE['has_auth_level_business_spoc'] == '1') echo 'Apply for Approval and Book'; 
+                                      else echo 'Book'; ?>
+                            </button>
+                            <br><br>
+
+                        </form>
+                    </div>
+
+                    <div id="l">
+                        <form id="add-operator-form" role="form" action="/postAddBooking" method="POST">
+                            <input type="hidden" name="tour_type" value="1">
+
+                            <input type="hidden" name="is_local" value="1">
+
+                            <input type="hidden" name="admin_id" value="<?php echo $_COOKIE['admin_id_business_spoc']; ?>">
+                            <input type="hidden" name="group_id" value="<?php echo intval($_COOKIE['group_id_business_spoc']); ?>">
+                            <input type="hidden" name="subgroup_id" value="<?php echo intval($_COOKIE['subgroup_id_business_spoc']); ?>">
+
+                            <div class="form-group">
+                                <p style="font-weight:bold">Pickup City for Taxi *</p>
+                                    <select name="city_id" id="city_id" data-rel="chosen" class="form-control"
+                                    style="width:200px; margin-left:0">
+                                        <option selected value="">Select</option>
+                                        <?php for($x=0; $x<$citiesCount; $x++){ ?>
+                                                            <option value="<?php echo $citiesData['response']['Cities'][$x]['id'] ?>"><?php echo $citiesData['response']['Cities'][$x]['name'] ?></option>
+                                                          <?php } ?>
+                                    </select>
+                            </div>
+
+
+
+                            <div class="form-group" style="clear:left;"><br>
+                                <label for="pickup_location">Pickup Location *</label>
+                                <input type="text" class="form-control" name="pickup_location" id="pickup_location" placeholder="Pickup Location">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pickup_location">Pickup Date and Time *</label>
+                                <input type="text" class="form-control" name="pickup_datetime" id="pickup_datetime" placeholder="Pickup Time">
+                            </div>
+
+                            <div class="form-group">
+                                <p style="font-weight:bold">Taxi Type *</p>
+                                    <select name="taxi_type_id" id="taxi_type_id" data-rel="chosen" class="form-control"
+                                    style="width:200px; margin-left:0">
+                                        <option selected value="">Select</option>
+                                        <?php for($x=0; $x<$taxitypesCount; $x++){ ?>
+                                                            <option value="<?php echo $taxitypesData['response']['TaxiTypes'][$x]['id'] ?>"><?php echo $taxitypesData['response']['TaxiTypes'][$x]['name'] ?></option>
+                                                          <?php } ?>
+                                    </select>
+                            </div>
+                            
+
+                            <input type="hidden" name="days" value="NULL">
+                            <input type="hidden" name="drop_city_id" value="NULL">
+
+                            <div class="form-group">
+                                <p style="font-weight:bold">Package *</p>
+                                    <select name="rate_id" id="rate_id"  data-role="none" required class="form-control" style="width:200px; margin-left:0">
+                                    </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pickup_location">No of Passengers *</label>
+                                <select name="no_of_seats" id="no_of_seats_l" data-rel="chosen" required style="width:50px;">
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                </select>
+                            </div>
+
+                            <div id="l_e_1" style="border:1px solid black; padding:10px 10px 5px 10px;" class="sel_div">
+                                <label for="group_name">Employee 1</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_1" id="employee_id_1" data-rel="chosen" class="form-control js-basic-single emp1"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_1" id="employee_contact_1" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_1" id="employee_cid_1" placeholder="Employee Id" required>
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_1" id="employee_name_1" placeholder="Name" required>
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input  style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_1" id="employee_contact_1" placeholder="Contact No" required type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px" >
+                                    <input type="email" class="form-control" name="employee_email_1" id="employee_email_1" placeholder="Email" required>
+                                </div> -->
+                            </div>
+
+                            <div id="l_e_2" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 2</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_2" id="employee_id_2" data-rel="chosen" class="form-control js-basic-single emp2"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_2" id="employee_contact_2" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_2" id="employee_cid_2" placeholder="Employee Id" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_2" id="employee_name_2" placeholder="Name" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input  style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_2" id="employee_contact_2" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="email" class="form-control" name="employee_email_2" id="employee_email_2" placeholder="Email" >
+                                </div> -->
+                            </div>
+
+                            <div id="l_e_3" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 3</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_3" id="employee_id_3" data-rel="chosen" class="form-control js-basic-single emp3"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_3" id="employee_contact_3" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float
+                                :left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_3" id="employee_cid_3" placeholder="Employee Id" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_3" id="employee_name_3" placeholder="Name" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input  style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_3" id="employee_contact_3" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="email" class="form-control" name="employee_email_3" id="employee_email_3" placeholder="Email" >
+                                </div> -->
+                            </div>
+
+                            <div id="l_e_4" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 4</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_4" id="employee_id_4" data-rel="chosen" class="form-control js-basic-single emp4"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_4" id="employee_contact_4" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_4" id="employee_cid_4" placeholder="Employee Id" >
+                                </div>
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_4" id="employee_name_4" placeholder="Name" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input  style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_4" id="employee_contact_4" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="email" class="form-control" name="employee_email_4" id="employee_email_4" placeholder="Email" >
+                                </div> -->
+                            </div>
+
+                            <div id="l_e_5" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 5</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_5" id="employee_id_5" data-rel="chosen" class="form-control js-basic-single emp5"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_5" id="employee_contact_5" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_4" id="employee_cid_4" placeholder="Employee Id" >
+                                </div>
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_4" id="employee_name_4" placeholder="Name" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input  style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_4" id="employee_contact_4" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="email" class="form-control" name="employee_email_4" id="employee_email_4" placeholder="Email" >
+                                </div> -->
+                            </div>
+
+                            <div id="l_e_6" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 6</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_6" id="employee_id_6" data-rel="chosen" class="form-control js-basic-single emp6"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_6" id="employee_contact_6" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_4" id="employee_cid_4" placeholder="Employee Id" >
+                                </div>
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_4" id="employee_name_4" placeholder="Name" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input  style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_4" id="employee_contact_4" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="email" class="form-control" name="employee_email_4" id="employee_email_4" placeholder="Email" >
+                                </div> -->
+                            </div>
+
+                            
+                            <br><br>
+                            <?php if($_COOKIE['has_assessment_codes_business_spoc'] == '1') { ?>
+                            <div class="form-group">
+                                <label for="pickup_location">Assessment Code *</label>
+                                <select class="form-control js-basic-single" name="ass_code" id="ass_code3">
+                                    <?php for($x=0; $x<$codeCount; $x++){ ?>
+                                        <option value="<?php echo $codeData['response']['AssCodes'][$x]['assessment_code'] ?>"><?php echo $codeData['response']['AssCodes'][$x]['assessment_code']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <?php }else{ ?>
+                                <input type="hidden" name="ass_code" value=" ">
+                            <?php } ?>
+
+                            <div class="form-group">
+                                <label for="pickup_location">Reason for Booking/ Details of Co-Passengers *</label>
+                                <textarea rows="4" cols="50" class="form-control" name="reason_booking" id="reason_booking" maxlength="1500"></textarea>
+                            </div>
+                            
+
+                            <button type="submit" onclick="return checkRequiredFields()" class="btn btn-warning">
+                                <?php if($_COOKIE['has_auth_level_business_spoc'] == '1') echo 'Apply for Approval and Book'; 
+                                      else echo 'Book'; ?>
+                            </button>
+                            <br><br>
+
+                        </form>
+                    </div>
+
+                    <div id="o" >
+                        <form id="add-operator-form" role="form" action="/postAddBooking" method="POST">
+
+                            <input type="hidden" name="is_local" value="0">
+                            <input type="hidden" name="tour_type" value="2"> 
+
+                            <input type="hidden" name="admin_id" value="<?php echo $_COOKIE['admin_id_business_spoc']; ?>">
+                            <input type="hidden" name="group_id" value="<?php echo intval($_COOKIE['group_id_business_spoc']); ?>">
+                            <input type="hidden" name="subgroup_id" value="<?php echo intval($_COOKIE['subgroup_id_business_spoc']); ?>">
+
+                            <div class="form-group">
+                                <p style="font-weight:bold">Pickup City for Taxi *</p>
+                                    <select name="city_id" id="city_id2" data-rel="chosen" class="form-control"
+                                    style="width:200px; margin-left:0">
+                                        <option selected value="">Select</option>
+                                        <?php for($x=0; $x<$citiesCount; $x++){ ?>
+                                                            <option value="<?php echo $citiesData['response']['Cities'][$x]['id'] ?>"><?php echo $citiesData['response']['Cities'][$x]['name'] ?></option>
+                                                          <?php } ?>
+                                    </select>
+                            </div>
+
+
+                            <div class="form-group" style="clear:left;">
+                                <label for="pickup_location">Pickup Location *</label>
+                                <input type="text" class="form-control" name="pickup_location" id="pickup_location2" placeholder="Pickup Location">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pickup_location">Pickup Date and Time *</label>
+                                <input type="text" class="form-control" name="pickup_datetime" id="pickup_datetime2" placeholder="Pickup Time">
+                            </div>
+
+                            <div class="form-group">
+                                <p style="font-weight:bold" for="selectError">Drop City *</p>
+                                    <input type="text" name="drop_city_name" id="city_id3" data-rel="chosen" class="form-control"
+                                    style="width:200px; margin-left:0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="days">Need cab for(Days) *</label>
+                                <input type="number" class="form-control" name="days" id="days" placeholder="No of Days"
+                                min="1">
+                            </div>  
+
+                            <div class="form-group">
+                                <p style="font-weight:bold">Taxi Type *</p>
+                                    <select name="taxi_type_id2" id="taxi_type_id2" data-rel="chosen" class="form-control" style="width:200px; margin-left:0">
+                                        <option selected value="">Select</option>
+                                        <?php for($x=0; $x<$taxitypesCount; $x++){ ?>
+                                                            <option value="<?php echo $taxitypesData['response']['TaxiTypes'][$x]['id'] ?>"><?php echo $taxitypesData['response']['TaxiTypes'][$x]['name'] ?></option>
+                                                          <?php } ?>
+                                    </select>
+                            </div>
+
+                            <input type="hidden" name="rate_id" value="NULL">
+
+                            <div class="form-group">
+                                <label for="pickup_location">No of Passengers *</label>
+                                <select name="no_of_seats" id="no_of_seats_o" data-rel="chosen" required style="width:50px;">
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                </select>
+                            </div>
+
+                            <div id="o_e_1" style="border:1px solid black; padding:10px 10px 5px 10px;" class="sel_div">
+                                <label for="group_name">Employee 1</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_1" id="employee_id_1" data-rel="chosen" class="form-control js-basic-single emp1"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_1" id="employee_contact_1" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_1" id="employee_cid_1" placeholder="Employee Id" required>
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_1" id="employee_name_1" placeholder="Name" required>
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_1" id="employee_contact_1" placeholder="Contact No" required type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px" >
+                                    <input type="email" class="form-control" name="employee_email_1" id="employee_email_1" placeholder="Email" required>
+                                </div> -->
+                            </div>
+
+                            <div id="o_e_2" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 2</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_2" id="employee_id_2" data-rel="chosen" class="form-control js-basic-single emp2"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_2" id="employee_contact_2" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_2" id="employee_cid_2" placeholder="Employee Id" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_2" id="employee_name_2" placeholder="Name" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_2" id="employee_contact_2" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px" >
+                                    <input type="email" class="form-control" name="employee_email_2" id="employee_email_2" placeholder="Email" >
+                                </div> -->
+                            </div>
+
+                            <div id="o_e_3" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 3</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_3" id="employee_id_3" data-rel="chosen" class="form-control js-basic-single emp3"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_3" id="employee_contact_3" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_3" id="employee_cid_3" placeholder="Employee Id" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_3" id="employee_name_3" placeholder="Name" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_3" id="employee_contact_3" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px" >
+                                    <input type="email" class="form-control" name="employee_email_3" id="employee_email_3" placeholder="Email" >
+                                </div> -->
+                            </div>
+
+                            <div id="o_e_4" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                <label for="group_name">Employee 4</label><br><br>
+                                <div class="form-group">
+                                    <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                        <select name="employee_id_4" id="employee_id_4" data-rel="chosen" class="form-control js-basic-single emp4"
+                                        style="width:200px; margin-left:0">
+                                            <option selected value="">Select</option>
+                                            <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                              <?php } ?>
+                                        </select>
+                                </div>
+                                <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                    <input class="form-control"
+                                    name="employee_contact_4" id="employee_contact_4" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                </div>
+                            </div>
+
+
+
+                                <div id="o_e_5" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                    <label for="group_name">Employee 5</label><br><br>
+                                    <div class="form-group">
+                                        <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                            <select name="employee_id_5" id="employee_id_5" data-rel="chosen" class="form-control js-basic-single emp5"
+                                            style="width:200px; margin-left:0">
+                                                <option selected value="">Select</option>
+                                                <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                    <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                                  <?php } ?>
+                                            </select>
+                                    </div>
+                                    <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                        <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                        <input class="form-control"
+                                        name="employee_contact_5" id="employee_contact_5" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                    </div>
+                                </div>
+
+                                <div id="o_e_6" style="display:none; border:1px solid black; padding:10px 10px 5px 10px; margin-top:10px" class="sel_div">
+                                    <label for="group_name">Employee 6</label><br><br>
+                                    <div class="form-group">
+                                        <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                            <select name="employee_id_6" id="employee_id_6" data-rel="chosen" class="form-control js-basic-single emp6"
+                                            style="width:200px; margin-left:0">
+                                                <option selected value="">Select</option>
+                                                <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                                                    <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                                                  <?php } ?>
+                                            </select>
+                                    </div>
+                                    <div class="form-group contact_div" style="width:32%;  display: inline-block;" >
+                                        <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;" >
+
+                                        <input class="form-control"
+                                        name="employee_contact_6" id="employee_contact_6" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" style="width:72%; float:left; margin-left:2px" >
+                                    </div>
+                                </div>
+                                <!-- <div class="form-group" style="width:20%; float:left; display: inline-block;">
+                                    <input type="text" class="form-control" name="employee_cid_4" id="employee_cid_4" placeholder="Employee Id" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" name="employee_name_4" id="employee_name_4" placeholder="Name" >
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px">
+                                    <input type="text" class="form-control" value="+91" disabled style="width:25%; float:left;">
+
+                                    <input  style="width:72%; float:left; margin-left:2px" class="form-control" name="employee_contact_4" id="employee_contact_4" placeholder="Contact No"  type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                                </div>
+
+                                <div class="form-group" style="width:20%; float:left; display: inline-block; margin-left:10px" >
+                                    <input type="email" class="form-control" name="employee_email_4" id="employee_email_4" placeholder="Email" >
+                                </div> -->
+                            
+
+                            <br><br>
+                            <?php if($_COOKIE['has_assessment_codes_business_spoc'] == '1') { ?>
+                            <div class="form-group">
+                                <label for="pickup_location">Assessment Code *</label>
+                               <select class="form-control js-basic-single" name="ass_code" id="ass_code3">
+                                    <?php for($x=0; $x<$codeCount; $x++){ ?>
+                                        <option value="<?php echo $codeData['response']['AssCodes'][$x]['assessment_code'] ?>"><?php echo $codeData['response']['AssCodes'][$x]['assessment_code']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <?php }else{ ?>
+                                <input type="hidden" name="ass_code" value=" ">
+                            <?php } ?>
+
+                            <div class="form-group">
+                                <label for="pickup_location">Reason for Booking/ Details of Co-Passengers *</label>
+                                <textarea rows="4" cols="50" class="form-control" name="reason_booking" id="reason_booking2" maxlength="1500"></textarea>
+                            </div>
+
+                            <button type="submit" onclick="return checkRequiredFields()" class="btn btn-warning">
+                                <?php if($_COOKIE['has_auth_level_business_spoc'] == '1') echo 'Apply for Approval and Book'; 
+                                      else echo 'Book'; ?>
+                            </button>
+                            <br><br>
+
+                        </form>
+                    </div>
+
+                    <div id="b" >
+                        <form id="add-operator-form" role="form" action="/postAddBooking" method="POST">
+
+                            <input type="hidden" name="is_local" value="0">
+                            <input type="hidden" name="tour_type" value="3"> 
+
+                            <input type="hidden" name="admin_id" value="<?php echo $_COOKIE['admin_id_business_spoc']; ?>">
+                            <input type="hidden" name="group_id" value="<?php echo intval($_COOKIE['group_id_business_spoc']); ?>">
+                            <input type="hidden" name="subgroup_id" value="<?php echo intval($_COOKIE['subgroup_id_business_spoc']); ?>">
+
+                            <div class="form-group" style="clear:left;">
+                                <label for="pickup_city">Pickup City *</label>
+                                <input type="text" class="form-control" name="pickup_city" id="pickup_city" placeholder="Pickup City" required>
+                            </div>
+
+                            <div class="form-group" style="clear:left;">
+                                <label for="drop_city">Drop City *</label>
+                                <input type="text" class="form-control" name="drop_city" id="drop_city" placeholder="Drop City" required>
+                            </div>
+
+                            <label for="pickup_location">Pickup Date and Time</label><br><br>
+                            <div class="form-group">
+                                <label for="pickup_location">From*</label>
+                                <input type="text" class="form-control" name="time_range_from" id="pickup_datetime3" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pickup_location">To</label>
+                                <input type="text" class="form-control" name="time_range_to" id="pickup_datetime4" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Bus Type Priority 1</label><br>
+                                <fieldset>
+                                  <div class="some-class">
+                                    <select name="bus_type_priority_1" id="bus_type_priority_1" data-rel="chosen" class="form-control" style="width:200px; margin-left:0" required>
+                                        <option value="AC Seater">AC Seater</option>
+                                        <option value="AC Sleeper">AC Sleeper</option>
+                                        <option value="NON AC Seater">NON AC Seater</option>
+                                        <option value="NON AC Sleeper">NON AC Sleeper</option>
+                                    </select>
+                                  </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Bus Type Priority 2</label><br>
+                                <fieldset>
+                                  <div class="some-class">
+                                    <select name="bus_type_priority_2" id="bus_type_priority_2" data-rel="chosen" class="form-control" style="width:200px; margin-left:0">
+                                        <option value="AC Seater">AC Seater</option>
+                                        <option value="AC Sleeper" selected>AC Sleeper</option>
+                                        <option value="NON AC Seater">NON AC Seater</option>
+                                        <option value="NON AC Sleeper">NON AC Sleeper</option>
+                                    </select>
+                                  </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Bus Type Priority 3</label><br>
+                                <fieldset>
+                                  <div class="some-class">
+                                    <select name="bus_type_priority_3" id="bus_type_priority_3" data-rel="chosen" class="form-control" style="width:200px; margin-left:0">
+                                        <option value="AC Seater">AC Seater</option>
+                                        <option value="AC Sleeper">AC Sleeper</option>
+                                        <option value="NON AC Seater" selected>NON AC Seater</option>
+                                        <option value="NON AC Sleeper">NON AC Sleeper</option>
+                                    </select>
+                                  </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="form-group" style="clear:left;">
+                                <label for="drop_city">Boarding Point*</label>
+                                <input type="text" class="form-control" name="boarding_point" id="boarding_point" placeholder="Boarding Point">
+                            </div>
+
+                            <div class="form-group">
+                                <p style="font-weight:bold">Employee ID / Employee Name</p>
+                                <select name="people_id" id="people_id" data-rel="chosen" class="form-control js-basic-single emp1"
+                                style="width:200px; margin-left:0" required>
+                                    <option selected value="">Select</option>
+                                    <?php for($x=0; $x<$employeesCount; $x++){ ?>
+                                    <option value="<?php echo $employeesData['response']['People'][$x]['id'] ?>"><?php echo $employeesData['response']['People'][$x]['people_name']."/".$employeesData['response']['People'][$x]['people_cid']; ?></option>
+                                  <?php } ?>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                            	<strong>Age*</strong>
+                                <input type="text" class="form-control" name="age" id="age" placeholder="Age of Passenger" required>
+                            </div>
+                            
+                             <div class="form-group">
+                                <label for="id_proof_type">ID Proof Type*</label><br>
+                                
+                                    <select name="id_proof_type" id="id_proof_type" data-rel="chosen" class="form-control" required>
+                                        <option value="Aadhaar Card" selected>Aadhaar Card</option>
+                                        <option value="Voter ID">Voter ID</option>
+                                        <option value="Driving License">Driving License</option>
+                                        <option value="PAN Card">PAN Card</option>
+                                    </select>
+                                 
+                            </div>
+                            
+                             <div class="form-group">
+                            	<strong>ID Card No.*</strong>
+                                <input type="text" class="form-control" name="id_card_no" id="id_card_no" placeholder="ID Card Number" required>
+                            </div>
+
+                            <?php if($_COOKIE['has_assessment_codes_business_spoc'] == '1') { ?>
+                            <div class="form-group">
+                                <label for="pickup_location">Assessment Code *</label>
+                               <select class="form-control js-basic-single" name="ass_code" id="ass_code3">
+                                    <?php for($x=0; $x<$codeCount; $x++){ ?>
+                                        <option value="<?php echo $codeData['response']['AssCodes'][$x]['assessment_code'] ?>"><?php echo $codeData['response']['AssCodes'][$x]['assessment_code']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <?php }else{ ?>
+                                <input type="hidden" name="ass_code" value=" ">
+                            <?php } ?>
+
+                            <div class="form-group">
+                                <label for="pickup_location">Reason for Booking/ Details of Co-Passengers *</label>
+                                <textarea rows="4" cols="50" class="form-control" name="reason_of_booking" id="reason_booking4" maxlength="1500" required></textarea>
+                            </div>
+
+                            <button type="submit" onclick="return checkRequiredFields()" class="btn btn-warning">
+                                <?php if($_COOKIE['has_auth_level_business_spoc'] == '1') echo 'Apply for Approval and Book'; 
+                                      else echo 'Book'; ?>
+                            </button>
+                            <br><br>
+
+                        </form>
+                    </div>
+            </div>
+        </div>
+    </div>
+    <!--/span-->
+
+</div><!--/row-->
+*Note:
+Please note that the requirement shall be accepted only after the approvals from the designated authority. Once the approvals are received, only after that the car shall be booked.
+
+
+    <?php echo $this->mess ;?>
+
+    <script>
+    var input = document.getElementById('pickup_location');
+    var input2 = document.getElementById('pickup_location2');
+    var input3 = document.getElementById('pickup_location3');
+    var input4 = document.getElementById('drop_location3');
+    var input5 = document.getElementById('boarding_point');
+    var admin_id = "<?php echo $_COOKIE['admin_id_business_spoc']; ?>";
+    var at = "<?php echo $_COOKIE['access_token_business_spoc']; ?>";
+    var options = {
+        types: []
+    };
+    var autocomplete = new google.maps.places.Autocomplete(input, options);
+    var autocomplete2 = new google.maps.places.Autocomplete(input2, options);
+    var autocomplete3 = new google.maps.places.Autocomplete(input3, options);
+    var autocomplete4 = new google.maps.places.Autocomplete(input4, options);
+    var autocomplete5 = new google.maps.places.Autocomplete(input5, options);
+
+    var i_r = "<?php echo $_COOKIE['is_radio_business_spoc'] == '1' ?>";
+    var i_l = "<?php echo $_COOKIE['is_local_business_spoc'] == '1' ?>";
+    var i_o = "<?php echo $_COOKIE['is_outstation_business_spoc'] == '1' ?>";
+    setTimeout(
+        function() 
+            {
+                if(i_r)
+                {
+                    document.getElementById("Radio").checked = true;
+                    $('#r').show();
+                    $('#l').hide();
+                    $('#o').hide();
+                    $('#b').hide();
+                }
+                else if (i_l) 
+                {
+                    document.getElementById("Local").checked = true;
+                    $('#r').hide();
+                    $('#l').show();
+                    $('#o').hide();
+                    $('#b').hide();
+                }
+                else
+                {
+                    document.getElementById("Outstation").checked = true;
+                    $('#r').hide();
+                    $('#l').hide();
+                    $('#o').show();
+                    $('#b').hide();
+                }
+            }, 
+        200);
+
+    function checkRequiredFields() {
+        if($('#Radio').is(':checked'))
+        {
+            var pkl = document.getElementById("pickup_location3").value;
+            var drl = document.getElementById("drop_location3").value;
+            var pkdt = document.getElementById("pickup_datetime3").value;
+            var ass = document.getElementById("ass_code3").value;
+            var rea = document.getElementById("reason_booking3").value;
+
+            if(!pkl || !drl || !pkdt || !ass || !rea)
+            {
+                alert('PLease fill all the required fields marked as *');
+                return false;
+            }
+        }
+
+        if($('#Local').is(':checked'))
+        {
+            var pkl = document.getElementById("pickup_location").value;
+            // var drl = document.getElementById("drop_location").value;
+            var pkdt = document.getElementById("pickup_datetime").value;
+            var ass = document.getElementById("ass_code").value;
+            var rea = document.getElementById("reason_booking").value;
+
+            var cit = document.getElementById("city_id").value;
+            var tti = document.getElementById("taxi_type_id").value;
+            var ri = document.getElementById("rate_id").value;
+
+            if(!pkl  || !pkdt || !ass || !rea || !cit || !tti || !ri)
+            {
+                alert('PLease fill all the required fields marked as *');
+                return false;
+            }
+        }
+
+        if($('#Outstation').is(':checked'))
+        {
+            var pkl = document.getElementById("pickup_location2").value;
+            // var drl = document.getElementById("drop_location2").value;
+            var pkdt = document.getElementById("pickup_datetime2").value;
+            var ass = document.getElementById("ass_code2").value;
+            var rea = document.getElementById("reason_booking2").value;
+
+            var cit = document.getElementById("city_id2").value;
+            var tti = document.getElementById("taxi_type_id2").value;
+            var dcit = document.getElementById("city_id3").value;
+            var d = document.getElementById("days").value;
+
+            if(!pkl  || !pkdt || !ass || !rea || !cit || !tti || !dcit || !d)
+            {
+                alert('PLease fill all the required fields marked as *');
+                return false;
+            }
+        }
+
+        if($('#Bus').is(':checked'))
+        {
+            var pkl = document.getElementById("pickup_city").value;
+            // var drl = document.getElementById("drop_location2").value;
+            var pkdt = document.getElementById("drop_city").value;
+            var ass = document.getElementById("pickup_datetime3").value;
+            var rea = document.getElementById("pickup_datetime4").value;
+
+            var tti = document.getElementById("boarding_point").value;
+            var dcit = document.getElementById("ass_code").value;
+            var d = document.getElementById("reason_booking4").value;
+
+            if(!pkl  || !pkdt || !ass || !rea || !tti || !dcit || !d)
+            {
+                alert('PLease fill all the required fields marked as *');
+                return false;
+            }
+        }
+
+    }
+
+    $('#Local').click(function() {
+       /*if($('#radio_button').is(':checked')) { alert("it's checked"); }*/
+       $('#l').show();
+       $('#o').hide();
+       $('#r').hide();
+       $('#b').hide();
+       $("#no_of_seats_l option[value=" + 5 + "]").hide();
+       $("#no_of_seats_l option[value=" + 6 + "]").hide();
+    });
+
+    $('#Outstation').click(function() {
+       /*if($('#radio_button').is(':checked')) { alert("it's checked"); }*/
+       $('#o').show();
+       $('#l').hide();
+       $('#r').hide();
+       $('#b').hide();
+       $("#no_of_seats_o option[value=" + 5 + "]").hide();
+       $("#no_of_seats_o option[value=" + 6 + "]").hide();
+    });
+
+    $('#Radio').click(function() {
+       /*if($('#radio_button').is(':checked')) { alert("it's checked"); }*/
+       $('#r').show();
+       $('#l').hide();
+       $('#o').hide();
+       $('#b').hide();
+    });
+
+    $('#Bus').click(function() {
+       /*if($('#radio_button').is(':checked')) { alert("it's checked"); }*/
+       $('#r').hide();
+       $('#l').hide();
+       $('#o').hide();
+       $('#b').show();
+    });    
+
+$(document).ready(function() {
+
+    $(".js-basic-single").select2();
+    
+
+    var d = new Date();
+
+    var year = d.getFullYear();
+
+    if(d.getMonth() < 9)
+        var month = String('0' + d.getMonth()).slice(-2);
+    else
+        var month = d.getMonth();
+
+    if(d.getDate() < 10)
+        var day = String('0' + d.getDate()).slice(-2);
+    else
+        var day = d.getDate();
+    
+    if(d.getHours() < 10)    
+        var hours = String('0' + d.getHours()).slice(-2);
+    else
+        var hours = d.getHours();
+
+    if(d.getMinutes() < 10)
+        var minutes = String('0' + d.getMinutes()).slice(-2);
+    else
+        var minutes = d.getMinutes();
+    $('#pickup_datetime,#pickup_datetime2,#pickup_datetime3,#pickup_datetime4').daterangepicker({
+        "singleDatePicker": true,
+        "timePicker": true,
+        "timePicker24Hour": true,
+        "defaultDate": new Date(),
+        locale: {
+          format: 'YYYY-MM-DD HH:mm:ss'
+        },
+        "minDate": new Date()
+    });
+
+    /*var prettyDate = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':00';
+    d.prettyDate = new Date(prettyDate);
+    $("#pickup_datetime, #pickup_datetime2, #pickup_datetime3").val(prettyDate);*/
+
+    var d = new Date(year, month, day, hours, minutes, 0, 0);
+    // $("#pickup_datetime, #pickup_datetime2, #pickup_datetime3").val(d);
+
+    $('#pickup_location').datetimepicker({
+        datepicker:true,
+        format:'Y-m-d H:i:s'
+    });
+
+});
+
+    
+
+    var fun1 = (function(at, ci){
+        jQuery.ajax({
+                    url: 'http://taxivaxi.com/api/taxis/getAllByCity',
+                    type: 'post',
+                    data: {
+                        access_token: at,
+                        city_id: ci
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if(data.success == '0')
+                        {
+                            $('#taxi_type_id')
+                                .find('option')
+                                .remove();
+
+                            alert('No taxi of this city found. Please select another');
+                        }
+                        else
+                        {
+                            console.log(data);
+                            $('#taxi_type_id')
+                                .find('option')
+                                .remove();
+            
+                            var Models = data.response.Taxis;
+                            var len = Models.length;
+
+                            $('#taxi_type_id')
+                                    .append($("<option></option>")
+                                    .attr("value",Models[0]['id'])
+                                    .text(Models[0]['car_company'] + " " +Models[0]['model_name']));
+                            /*$('#model_id_chosen span').html(Models[0]['name']);*/
+
+                            if(len>1)
+                            {
+                                for(var i=1; i<len; i++)
+                                {
+                                    $('#taxi_type_id')
+                                        .append($("<option></option>")
+                                         .attr("value",Models[i]['id'])
+                                         .text(Models[i]['car_company'] + " " +Models[i]['model_name']));
+                                }
+                            }
+                            
+                             $('#taxi_type_id').selectmenu('refresh', true);
+                            
+                        }
+                    },
+                    error: function(data)
+                    {
+                    }
+                });
+    });
+
+    var fun5 = (function(at, ci, tti, admin_id){
+        jQuery.ajax({
+                    url: 'http://taxivaxi.in/business/api/getRateByCityAndTaxi',
+                    type: 'post',
+                    data: {
+                        access_token: at,
+                        city_id: ci,
+                        taxi_type_id: tti,
+                        admin_id : admin_id,
+                        tour_type : '1'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if(data.success == '0')
+                        {
+                            $('#rate_id')
+                                .find('option')
+                                .remove();
+
+                            alert('No Package of this city found. Please select another');
+                        }
+                        else
+                        {
+                            
+                            $('#rate_id')
+                                .find('option')
+                                .remove();
+            
+                            var Pkages = data.response.Pkages;
+                            var len = Pkages.length;
+
+                            $('#rate_id')
+                                    .append($("<option></option>")
+                                    .attr("value",Pkages[0]['id'])
+                                    .text(Pkages[0]['package_name']));
+                            /*$('#model_id_chosen span').html(Models[0]['name']);*/
+
+                            if(len>1)
+                            {
+                                for(var i=1; i<len; i++)
+                                {
+                                    $('#rate_id')
+                                        .append($("<option></option>")
+                                         .attr("value",Pkages[i]['id'])
+                                         .text(Pkages[i]['package_name']));
+                                }
+                            }
+                            
+                             $('#rate_id').selectmenu();
+                             $('#rate_id').selectmenu('refresh', false);
+                            /*console.log(data.response.TaxiModels[0]);*/
+                        }
+                    },
+                    error: function(data)
+                    {
+                    }
+                });
+    });
+    
+    $("#city_id,#taxi_type_id").change(function()
+                {
+                    var ci=$('#city_id').val();
+                    var tti=$('#taxi_type_id').val();
+                    // alert('tt');
+                    var at = '<?php echo $_COOKIE["access_token_business_spoc"]?>' ;
+
+                    if(tti)
+                    {
+                        if(tti == 2)
+                        {
+                            $("#no_of_seats_l option[value=" + 5 + "]").show();
+                            $("#no_of_seats_l option[value=" + 6 + "]").show();
+                        }
+                    }
+
+                    if(ci && tti)
+                    {
+                        fun5(at, ci, tti, admin_id);
+                    }
+                });
+
+    $("#city_id2,#taxi_type_id2").change(function()
+                {
+                    var ci=$('#city_id2').val();
+                    var tti=$('#taxi_type_id2').val();
+                    // alert('tt');
+                    var at = '<?php echo $_COOKIE["access_token_business_spoc"]?>' ;
+
+                    if(tti)
+                    {
+                        if(tti == 2)
+                        {
+                            $("#no_of_seats_o option[value=" + 5 + "]").show();
+                            $("#no_of_seats_o option[value=" + 6 + "]").show();
+                        }
+                    }
+
+                    if(ci && tti)
+                    {
+                        fun5(at, ci, tti, admin_id);
+                    }
+                });
+
+
+    $("#no_of_seats_r").change(function()
+            {
+                var count =  $("#no_of_seats_r").val();
+                var emp_count = parseInt('<?php echo $employeesCount; ?>');
+                if( count > emp_count)
+                {
+                    alert('You do not have these many Employees.');
+                    $('#no_of_seats_r').val(emp_count);
+                    $('#no_of_seats_r').trigger("change");
+                }
+                else
+                {
+                    if(count == 1)
+                    {
+                        $('#r_e_1').show();
+                        $('#r_e_2').hide();
+                        $('#r_e_3').hide();
+                        $('#r_e_4').hide();
+                    }
+                    else if(count == 2)
+                    {
+                        $('#r_e_1').show();
+                        $('#r_e_2').show();
+                        $('#r_e_3').hide();
+                        $('#r_e_4').hide();
+                    }
+                    else if(count == 3)
+                    {
+                        $('#r_e_1').show();
+                        $('#r_e_2').show();
+                        $('#r_e_3').show();
+                        $('#r_e_4').hide();
+                    }
+                    else if(count == 4)
+                    {
+                        $('#r_e_1').show();
+                        $('#r_e_2').show();
+                        $('#r_e_3').show();
+                        $('#r_e_4').show();
+                    }
+                }
+            });
+
+    $("#no_of_seats_l").change(function()
+            {
+                var count =  $("#no_of_seats_l").val();
+                var emp_count = parseInt('<?php echo $employeesCount; ?>');
+                if( count > emp_count)
+                {
+                    alert('You do not have these many Employees.');
+                    $('#no_of_seats_l').val(emp_count);
+                    $('#no_of_seats_l').trigger("change");
+                }
+                else
+                {
+                    if(count == 1)
+                    {
+                        $('#l_e_1').show();
+                        $('#l_e_2').hide();
+                        $('#l_e_3').hide();
+                        $('#l_e_4').hide();
+                    }
+                    else if(count == 2)
+                    {
+                        $('#l_e_1').show();
+                        $('#l_e_2').show();
+                        $('#l_e_3').hide();
+                        $('#l_e_4').hide();
+                        $('#l_e_5').hide();
+                        $('#l_e_6').hide();
+                    }
+                    else if(count == 3)
+                    {
+                        $('#l_e_1').show();
+                        $('#l_e_2').show();
+                        $('#l_e_3').show();
+                        $('#l_e_4').hide();
+                        $('#l_e_5').hide();
+                        $('#l_e_6').hide();
+                    }
+                    else if(count == 4)
+                    {
+                        $('#l_e_1').show();
+                        $('#l_e_2').show();
+                        $('#l_e_3').show();
+                        $('#l_e_4').show();
+                        $('#l_e_5').hide();
+                        $('#l_e_6').hide();
+                    }
+                    else if(count == 5)
+                    {
+                        $('#l_e_1').show();
+                        $('#l_e_2').show();
+                        $('#l_e_3').show();
+                        $('#l_e_4').show();
+                        $('#l_e_5').show();
+                        $('#l_e_6').hide();
+                    }
+                    else if(count == 6)
+                    {
+                        $('#l_e_1').show();
+                        $('#l_e_2').show();
+                        $('#l_e_3').show();
+                        $('#l_e_4').show();
+                        $('#l_e_5').show();
+                        $('#l_e_6').show();
+                    }
+                }
+            });
+
+    $("#no_of_seats_o").change(function()
+            {
+                var count =  $("#no_of_seats_o").val();
+                var emp_count = parseInt('<?php echo $employeesCount; ?>');
+                if( count > emp_count)
+                {
+                    alert('You do not have these many Employees.');
+                    $('#no_of_seats_o').val(emp_count);
+                    $('#no_of_seats_o').trigger("change");
+                }
+                else
+                {
+                    if(count == 1)
+                    {
+                        $('#o_e_1').show();
+                        $('#o_e_2').hide();
+                        $('#o_e_3').hide();
+                        $('#o_e_4').hide();
+                        $('#o_e_5').hide();
+                        $('#o_e_6').hide();
+                    }
+                    else if(count == 2)
+                    {
+                        $('#o_e_1').show();
+                        $('#o_e_2').show();
+                        $('#o_e_3').hide();
+                        $('#o_e_4').hide();
+                        $('#o_e_5').hide();
+                        $('#o_e_6').hide();
+                    }
+                    else if(count == 3)
+                    {
+                        $('#o_e_1').show();
+                        $('#o_e_2').show();
+                        $('#o_e_3').show();
+                        $('#o_e_4').hide();
+                        $('#o_e_5').hide();
+                        $('#o_e_6').hide();
+                    }
+                    else if(count == 4)
+                    {
+                        $('#o_e_1').show();
+                        $('#o_e_2').show();
+                        $('#o_e_3').show();
+                        $('#o_e_4').show();
+                        $('#o_e_5').hide();
+                        $('#o_e_6').hide();
+                    }
+                    else if(count == 5)
+                    {
+                        $('#o_e_1').show();
+                        $('#o_e_2').show();
+                        $('#o_e_3').show();
+                        $('#o_e_4').show();
+                        $('#o_e_5').show();
+                        $('#o_e_6').hide();
+                    }
+                    else if(count == 6)
+                    {
+                        $('#o_e_1').show();
+                        $('#o_e_2').show();
+                        $('#o_e_3').show();
+                        $('#o_e_4').show();
+                        $('#o_e_5').show();
+                        $('#o_e_6').show();
+                    }
+                }
+            });
+
+    $("#pickup_location3,#drop_location3").change(function()
+            {
+                var pickup_location =  $("#pickup_location3").val();
+                var drop_location = $("#drop_location3").val();
+
+                if(pickup_location && drop_location)
+                {
+                    jQuery.ajax({
+                        url: 'http://taxivaxi.in/business/api/getRadioEstimates',
+                        type: 'post',
+                        data: {
+                            access_token: at,
+                            pickup_location: pickup_location,
+                            drop_location: drop_location
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function(data)
+                        {
+                        }
+                    });
+                }
+            });
+
+    $(".emp1, .emp2, .emp3, .emp4, .emp5, .emp6").change(function(){
+        var people_id = parseInt($(this).val());
+        var sel_div = $(this).closest('div.sel_div');
+        var contact_div = sel_div.find('div.contact_div').find('input').eq('1');
+
+        if(people_id)
+        {
+            jQuery.ajax({
+                url: 'http://taxivaxi.in/business/api/viewPeopleProfile',
+                type: 'post',
+                data: {
+                    people_id: people_id
+                },
+                dataType: 'json',
+                success: function (data) {
+                    // console.log(data.response.people_contact);
+                    contact_div.val(data.response.people_contact)
+                },
+                error: function(data)
+                {
+                }
+            });
+        }
+
+    });
+
+    
+    </script>

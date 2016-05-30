@@ -1,0 +1,353 @@
+<?php 
+    echo $this->headStyle()->appendStyle('/css/RegistrationForm.css');
+    echo $this->inlineScript()->appendFile('/js/jquery.validate.min.js')->appendFile('/js/additional-methods.min.js');
+
+    // var_dump($this->booking);
+    $bookingData = json_decode($this->booking, true);
+?>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+
+<?php if(isset($_COOKIE['error'])) { ?>
+
+        <div class="box-content alerts" style="width:200px; margin:0 auto;">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong><?php echo $_COOKIE['error'] ?></strong>
+                </div>
+            </div>
+    <?php } ?>
+<br>
+<?php if($this->mess != "") { ?>
+
+        <div class="box-content alerts" style="width:400px; margin-left:435px;">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong><?php echo $this->mess ?></strong>
+                </div>
+            </div>
+    <?php } ?>
+    
+<section class="content" style="font-size: 12px">    
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header" data-original-title="">
+                <h2 style="margin-left:500px; font-weight:bold" class="box-title">Add Invoice : <?php echo $bookingData['response']['BookingDetail']['reference_no'] ?></h2>
+            </div>
+            <div class="box-content">
+            	
+            </div>
+        </div>
+    </div>
+    <!--/span-->
+<form id="add-operator-form" action="/postAddInvoiceRadio" method="POST" enctype="multipart/form-data">
+        <div class="form-group" style="float:left; margin-left:500px">
+            Browser Payin Slip:
+            <input class="btn btn-default" type="file" name="image" id="imgInp">
+        </div>
+
+</div><!--/row-->
+
+<input name="booking_id" value="<?php echo $this->booking_id; ?>" type="hidden">
+<input name="tour_type" value="<?php echo $bookingData['response']['BookingDetail']['tour_type']; ?>" type="hidden">
+<!--<div class="row">
+	<div class="col-md-3">
+		<div class="box">
+			<div class="box-body">
+				<div class="form-group">
+                                <label for="pickup_location">Operator</label>
+                                <input type="text" class="form-control" name="operator_name" id="operator_name" 
+                                value="<?php echo $bookingData['response']['BookingDetail']['operator_name'] ?>" readonly>
+                            </div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="box">
+			<div class="box-body">
+				<div class="form-group">
+                                <label for="pickup_location">Tour Type</label>
+                                <input type="text" class="form-control" name="tour_type" id="tour_type" value="<?php if($bookingData['response']['BookingDetail']['tour_type'] == 0){echo 'Radio';} elseif ($bookingData['response']['BookingDetail']['tour_type'] == 1) {echo 'Local';} else 
+                                    { echo 'Outstation' ;} ?>" readonly>
+                            </div>
+
+			</div>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="box">
+			<div class="box-body">
+				 <div class="form-group">
+                                <label for="pickup_location">Car Model</label>
+                                <input type="text" class="form-control" name="taxi_model_name" id="taxi_model_name" value="<?php echo "Sedan" ;?>"readonly>
+                            </div>
+			</div>
+		</div>
+	</div>
+</div>-->
+<div class="row">
+	<!--<div class="col-md-3">
+		<div class="box">
+			<div class="box-body">
+				 
+                    <div class="form-group">
+                                <label for="pickup_location">Total Minutes Done</label>
+                                <input type="number" class="form-control" name="hours_done" id="hours_done" placeholder="Minutes Done" step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Free Minutes</label>
+                                <input type="number" class="form-control" name="allowed_hrs" id="allowed_hrs" value="0" >
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Extra Minutes</label>
+                                <input type="number" class="form-control" name="extra_hours" id="extra_hours" placeholder="Extra Minutes Done" readonly style="border:1px solid red" step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Charge/Extra Minute</label>
+                                <input type="number" class="form-control" name="hour_rate" id="hour_rate" value="1">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Extra Charge for Minutes</label>
+                                <input type="number" class="form-control" name="extra_hours_charge" id="extra_hours_charge"   readonly style="border:1px solid green" step="0.01">
+                    </div>
+                   
+			</div>
+		</div>
+	</div>-->
+	<!--
+	<div class="col-md-3">
+		<div class="box">
+			<div class="box-body">
+				 <div class="form-group">
+                                <label for="pickup_location">Total Kms Done</label>
+                                <input type="number" class="form-control" name="kms_done" id="kms_done" placeholder="Kms Done" step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Free Kms</label>
+                                <input type="number" class="form-control" name="allowed_kms" id="allowed_kms" value="4" >
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Extra Kms</label>
+                                <input type="number" class="form-control" name="extra_kms" id="extra_kms" placeholder="Extra Kms Done" readonly style="border:1px solid red" step="0.01">
+                            </div>
+                    
+                    <div class="form-group">
+                                <label for="pickup_location">Charge/Extra Km</label>
+                                <input type="number" class="form-control" name="km_rate" id="km_rate" step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Extra Charge for Kms</label>
+                                <input type="number" class="form-control" name="extra_kms_charge" id="extra_kms_charge"   readonly style="border:1px solid green" step="0.01">
+                            </div>  
+
+                    <div class="form-group">
+                                <label for="pickup_location">Base Fare</label>
+                                <input type="number" class="form-control" name="base_rate" id="base_rate">
+                    </div>
+			</div>
+		</div>
+	</div>
+	-->
+	<!--<div class="col-md-3">
+		<div class="box">
+			<div class="box-body">
+				<div class="form-group">
+                                <label for="pickup_location">Total = Base Fare + Km Charge + Minutes Charges (Excluding Tax)</label>
+                                <input type="number" class="form-control" name="total_ex_tax" id="total_ex_tax" placeholder="Total(Excluding Tax)" readonly step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Tax Rate(%)</label>
+                                <input type="number" class="form-control" name="tax_rate" id="tax_rate" placeholder="Tax Rate" required value="5.8">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Tax</label>
+                                <input type="number" class="form-control" name="tax" id="tax" placeholder="Tax" readonly  step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Total = Tax + Total(Excluding Tax)</label>
+                                <input type="number" class="form-control" name="total" id="total" placeholder="Sub Total" readonly
+                                style="border:1px solid green" step="0.01">
+                            </div>                
+
+					 <div class="form-group">
+                                <label for="pickup_location">Extras (Parking Charges, Toll Tax, State Tax)</label>
+                                <input type="number" class="form-control" name="extras" id="extras"   required style="border:1px solid green" value="0">
+                            </div>  
+                       
+               
+			</div>
+		</div>
+	</div>-->
+	
+	<div class="col-md-12">
+		<div class="box">
+			<div class="box-body">
+				 <div class="form-group">
+                                <label for="pickup_location">Total (With Extras) = Total + Extras</label>
+                                <input type="number" class="form-control" name="total" id="total" placeholder="Total (With Extras)" style="border:1px solid green">
+                            </div> 
+                                 
+                    <div class="form-group">
+                                <label for="pickup_location">Management Fee(@10%)</label>
+                                <input type="number" class="form-control" name="taxivaxi_charge" id="taxivaxi_charge" placeholder="Tax Rate" readonly required>
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Service Tax Rate</label>
+                                <input type="number" class="form-control" name="taxivaxi_tax_rate" id="taxivaxi_tax_rate" placeholder="Tax"   value="14.5">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Service Tax</label>
+                                <input type="number" class="form-control" name="taxivaxi_tax_charge" id="taxivaxi_tax_charge" placeholder="Taxivaxi Tax" readonly>
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Sub Total = Total + Management Fee + Service Tax</label>
+                                <input type="number" class="form-control" name="sub_total" id="sub_total" placeholder="Sub Total" readonly
+                                style="border:1px solid green">
+                            </div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+			<div class="box-body" style="text-align: center">
+				<button type="submit" class="btn btn-success">Submit</button>
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+</form>
+</section>
+
+    <script>
+    
+
+    $(document).ready(function() {
+
+        /*$("#allowed_kms,#allowed_hrs,#kms_done,#hours_done,#km_rate,#hour_rate,#base_rate,#tax_rate,#taxivaxi_tax_rate,#extras").change(function()*/
+        $("#total").change(function()
+                {
+                    //var tour_type = '<?php echo $bookingData["response"]["BookingDetail"]["tour_type"]?>';
+
+                    /*var hours_done = parseFloat($('#hours_done').val()).toFixed(2);
+
+                    var kms_done = parseFloat($('#kms_done').val()).toFixed(2);
+
+                    var allowed_kms = parseFloat($('#allowed_kms').val()).toFixed(2);
+                    var allowed_hours = parseFloat($('#allowed_hrs').val()).toFixed(2);
+                    var extra_kms = parseFloat($('#extra_kms').val()).toFixed(2);
+                    var extra_hours = parseFloat($('#extra_hours').val()).toFixed(2);
+
+                    var km_rate = parseFloat($('#km_rate').val()).toFixed(2);
+                    var hour_rate = parseFloat($('#hour_rate').val()).toFixed(2);
+                    var extra_kms_charge = parseFloat($('#extra_kms_charge').val()).toFixed(2);
+                    var extra_hours_charge = parseFloat($('#extra_hours_charge').val()).toFixed(2);
+
+                    var extras = parseFloat($('#extras').val()).toFixed(2);
+
+                    var base_rate = parseFloat($('#base_rate').val()).toFixed(2);
+                    var total_ex_tax = parseFloat($('#total_ex_tax').val()).toFixed(2);
+
+                    var tax_rate = parseFloat($('#tax_rate').val()).toFixed(2);
+                    var tax = parseFloat($('#tax').val()).toFixed(2);*/
+
+                    var total = parseFloat($('#total').val()).toFixed(2);
+                    //var total_with_extras = parseFloat($('#total_with_extras').val()).toFixed(2);
+
+                    var taxivaxi_charge = parseFloat($('#taxivaxi_charge').val()).toFixed(2);
+                    var taxivaxi_tax_rate = parseFloat($('#taxivaxi_tax_rate').val()).toFixed(2);
+                    var taxivaxi_tax_charge = parseFloat($('#taxivaxi_tax_charge').val()).toFixed(2);
+
+                    var sub_total = parseFloat($('#sub_total').val()).toFixed(2);
+
+                    var at = '<?php echo $_COOKIE["access_token_business_taxivaxi"]?>' ;
+                    
+                    /*if(hours_done - allowed_hours > 0)
+                    {
+                        extra_hours = parseFloat(hours_done - allowed_hours).toFixed(2);
+                        $('#extra_hours').val(extra_hours);
+                    }
+                    else
+                    {
+                        extra_hours = 0;
+                        $('#extra_hours').val(0);
+                    }
+                    extra_hours_charge = parseFloat(hour_rate*extra_hours).toFixed(2);
+                    $('#extra_hours_charge').val(extra_hours_charge);
+                    
+                    
+                    if(kms_done - allowed_kms > 0)
+                    {
+                        extra_kms = parseFloat(kms_done - allowed_kms).toFixed(2);
+                        $('#extra_kms').val(extra_kms);
+                    }
+                    else
+                    {
+                        extra_kms = 0;
+                        $('#extra_kms').val(0);
+                    }
+                    extra_kms_charge = parseFloat(km_rate*extra_kms).toFixed(2);
+                    $('#extra_kms_charge').val(extra_kms_charge);*/
+                    
+
+                   /* if(!isNaN(parseInt(base_rate))&&!isNaN(parseInt(extra_kms_charge))&&!isNaN(parseInt(extra_hours_charge)))
+                    {
+                        t = parseFloat(extra_kms_charge)+parseFloat(base_rate)+parseFloat(extra_hours_charge);//+parseFloat(extras);
+                        total_ex_tax = parseFloat(t).toFixed(2);
+                        $('#total_ex_tax').val(total_ex_tax);
+                    }
+
+                    if(!isNaN(parseInt(tax_rate))&&!isNaN(parseInt(total_ex_tax)))
+                    {
+                        tax = parseFloat((parseFloat(tax_rate)*parseFloat(total_ex_tax))/100).toFixed(2);
+                        $('#tax').val(tax);
+
+                        total = parseFloat(parseFloat(total_ex_tax)+parseFloat(tax)).toFixed(2);
+                        $('#total').val(total);
+
+                    }*/
+                    
+                    if(!isNaN(parseFloat(total)))
+                    {
+						//total_with_extras = parseFloat(parseFloat(total)+parseFloat(extras)).toFixed(2);
+                        $('#total').val(total);
+                        
+                        taxivaxi_charge = parseFloat(parseFloat(total)*0.1).toFixed(2);
+                        if(parseFloat(taxivaxi_charge) > 100)
+                            taxivaxi_charge = 100;
+                        $('#taxivaxi_charge').val(taxivaxi_charge);
+					}
+
+                    if(!isNaN(parseInt(taxivaxi_tax_rate))&&!isNaN(parseInt(taxivaxi_charge)))
+                    {
+                        taxivaxi_tax_charge = parseFloat((parseFloat(taxivaxi_charge)*parseFloat(taxivaxi_tax_rate))/100).toFixed(2);
+
+                        $('#taxivaxi_tax_charge').val(taxivaxi_tax_charge);
+
+                        sub_total = parseFloat(parseFloat(total)+parseFloat(taxivaxi_charge)+parseFloat(taxivaxi_tax_charge)).toFixed(2);
+                        $('#sub_total').val(sub_total);
+                    }
+
+                    // console.log(tour_type+" "+pickup_date+" "+pickup_time+" "+drop_date+" "+drop_time+" "+hours_done+" "+start_km+" "+end_km+" "+kms_done+" "+allowed_kms+" "+allowed_hours+" "+km_rate+" "+hour_rate+" "+extra_kms_charge+" "+extra_hours_charge+" "+parking+" "+driver+" "+base_rate+" "+total_ex_tax+" "+tax_rate+" "+tax+" "+total+" "+ drop_datetime);
+
+
+                });
+        
+    });
+    </script>

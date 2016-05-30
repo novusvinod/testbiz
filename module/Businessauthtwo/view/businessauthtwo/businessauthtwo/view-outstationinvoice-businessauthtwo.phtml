@@ -1,0 +1,153 @@
+<?php
+$invoiceData = json_decode($this->invoice, true);
+?>
+
+<style>
+div.img {
+    margin: 5px;
+    border: 1px solid #ccc;
+    float: left;
+    width: 180px;
+}
+
+div.img:hover {
+    border: 1px solid #777;
+}
+
+div.img img {
+    width: 100%;
+    height: auto;
+}
+
+div.desc {
+    padding: 15px;
+    text-align: center;
+}
+</style>
+
+<?php if($invoiceData['response']['Invoice']['duty_slip'] != ''  ) {?>
+    <div class="img" style="margin-left:450px">
+        <a target="_blank" href="<?php echo $invoiceData['response']['Invoice']['duty_slip'] ; ?>">
+            <img src="<?php echo $invoiceData['response']['Invoice']['duty_slip'] ; ?>">
+        </a>
+        <div class="desc">Payin-Slip</div>
+    </div>
+<?php } ?>
+
+<div class="row">
+    <div class="box col-md-12">
+    <!-- <div class="box-inner"> -->
+    <!-- <div class="box-header well" data-original-title=""> -->
+        <h2 style="margin-left:340px"><i class="glyphicon glyphicon-list-alt"></i> Invoice : <a href="/businessauthtwo/viewBooking/<?php echo $invoiceData['response']['Invoice']['booking_id'] ?>"> <?php echo $invoiceData['response']['Invoice']['reference_no']; ?></a></h2>
+    <!-- </div> -->
+
+	<table class="table table-striped table-bordered bootstrap-datatable datatable responsive" style="width:700px; margin-left:200px">
+
+	<tr>
+        <th>Car Model</th>
+        <td><?php echo $invoiceData['response']['Invoice']['taxi_model_name']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Package Name</th>
+        <td><?php echo $invoiceData['response']['Invoice']['rate_name']; ?></td>
+    </tr>
+
+    <tr style="">
+        <th>Pickup Date</th>
+        <td><?php echo date("d M Y", strtotime($invoiceData['response']['Invoice']['pickup_date'])); ?></td>
+    </tr>
+
+    <tr>
+        <th>Pickup Time</th>
+        <td><?php echo date("h:i a", strtotime($invoiceData['response']['Invoice']['pickup_time'])); ?></td>
+    </tr>
+
+    <tr>
+        <th>Drop Date</th>
+        <td><?php echo date("d M Y", strtotime($invoiceData['response']['Invoice']['drop_date'])); ?></td>
+    </tr>
+
+    <tr>
+        <th>Drop Time</th>
+        <td><?php echo date("h:i a", strtotime($invoiceData['response']['Invoice']['drop_time'])); ?></td>
+    </tr>
+
+    <tr>
+        <th>Total Hous Done</th>
+        <td><?php echo $invoiceData['response']['Invoice']['hours_done']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Extra Hours</th>
+        <td><?php echo $invoiceData['response']['Invoice']['extra_hours']; ?></td>
+    </tr>
+
+    <tr style="border:2px solid black">
+        <th>Extra Hours Charge (@Rs<?php echo $invoiceData['response']['Invoice']['hour_rate'] ?>/Hour)</th>
+        <td><?php echo $invoiceData['response']['Invoice']['extra_hours_charge']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Start Km</th>
+        <td><?php echo $invoiceData['response']['Invoice']['start_km']; ?></td>
+    </tr>
+
+    <tr>
+        <th>End Km</th>
+        <td><?php echo $invoiceData['response']['Invoice']['end_km']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Total Kms Done</th>
+        <td><?php echo $invoiceData['response']['Invoice']['kms_done']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Extra Kms</th>
+        <td><?php echo $invoiceData['response']['Invoice']['extra_kms']; ?></td>
+    </tr>
+
+    <tr style="border-top:2px solid black ; border-left:2px solid black; border-right:2px solid black">
+        <th>Extra Kms Charge (@Rs<?php echo $invoiceData['response']['Invoice']['km_rate'] ?>/Km)</th>
+        <td><?php echo $invoiceData['response']['Invoice']['extra_kms_charge']; ?></td>
+    </tr>
+
+    <tr style="border-left:2px solid black; border-right:2px solid black">
+        <th>Package Base Rate</th>
+        <td><?php echo $invoiceData['response']['Invoice']['base_rate']; ?></td>
+    </tr>
+
+    <tr style="border-left:2px solid black; border-right:2px solid black">
+        <th>Parking Charges</th>
+        <td><?php echo $invoiceData['response']['Invoice']['parking']; ?></td>
+    </tr>
+
+    <tr style="border-left:2px solid black; border-right:2px solid black; border-bottom:2px solid black">
+        <th>Diver Charges</th>
+        <td><?php echo $invoiceData['response']['Invoice']['driver']; ?></td>
+    </tr>
+
+    <tr bgcolor="#ffffcc">
+        <th>Total (Excluding Tax)</th>
+        <td><?php echo $invoiceData['response']['Invoice']['total_ex_tax']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Tax (@<?php echo $invoiceData['response']['Invoice']['tax_rate']; ?>%)</th>
+        <td><?php echo $invoiceData['response']['Invoice']['tax']; ?></td>
+    </tr>
+
+    <tr bgcolor="#FFD929">
+        <th>Total (Rs)</th>
+        <td><?php echo round($invoiceData['response']['Invoice']['total'],2);; ?></td>
+    </tr>
+
+   
+    </table>
+    </div>
+    </div>
+    </div>
+    <!--/span-->
+
+    </div><!--/row-->

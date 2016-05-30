@@ -1,0 +1,344 @@
+<?php if(isset($_COOKIE['success'])) { ?>
+    <div class="alert alert-success alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <?php echo $_COOKIE['success'] ?>
+    </div>
+<?php } ?>
+
+<?php
+    $bookingsData = json_decode($this->bookings, true);
+    // var_dump($bookingsData);
+    if(isset($bookingsData['response'])){
+        $bookingsCount = count($bookingsData['response']['Bookings']);
+    }
+    else{
+        $bookingsCount = 0;
+    }
+
+    $employeesData = json_decode($this->employees, true);
+    $employeesCount;
+    if(isset($employeesData['response'])){
+        $employeesCount = count($employeesData['response']['People']);
+    }
+    else{
+        $employeesCount = 0;
+    }
+
+?>
+
+<?php echo $this->mess ;?>
+
+<div id="my_table">
+    <div style="text-align:center; font-weight:bold; font-size:18px;">
+        Cancelled/Rejected Bus Bookings
+    </div>
+
+    <div style="float:right; width:200px; margin-right:10px;">
+        <a href="/businessspoc/addBooking"><button class="btn btn-info btn-block" id="add_group_button">ADD New Booking</button></a>
+    </div>
+
+    <div class="row" style="padding-top:50px">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"></h3>
+                </div><!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-striped table-bordered datatable" id="table_booking">
+                        <thead>
+                            <tr style="width:100%; font-size:15px">
+                                <th style="width:5%" class="text-left">ID</th>
+                                <th style="width:14%; text-align:left" >Pickup City</th>
+                                <th style="width:14%; text-align:left" >Drop City</th>
+                                <th style="width:14%; text-align:left" >Bookings DateTime</th>
+                                <th style="width:14%; text-align:left" >Pickup DateTime Range</th>
+                                <th style="width:14%; text-align:left" >Bus Type Requested</th>
+                                <th style="width:7%; text-align:left" >Taxivaxi Status</th>
+                                <?php if($_COOKIE['has_auth_level_business_spoc'] == '1') {?>
+                                    <th style="width:6%; text-align:left" >Approver Status</th>
+                                    <th style="width:7%; text-align:left" >Accepted/<br>Rejected By<br>(Approver)</th>
+                                <?php } ?>
+                                <th style="width:7%; text-align:left" >Self Status</th>
+                                <th style="width:2%; text-align:left" >Details</th>
+                                <!-- <th style="width:2%; text-align:left" >Cancel</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php for($i=0; $i<$bookingsCount; $i++){ if($bookingsData['response']['Bookings'][$i]['status_auth1'] == '2' || $bookingsData['response']['Bookings'][$i]['status_auth2'] == '2' || $bookingsData['response']['Bookings'][$i]['status_spoc'] == '2' || $bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '2'){ ?>
+                            <tr style="font-size:13px; cursor:pointer" class="my_row" id="<?php echo $bookingsData['response']['Bookings'][$i]['id'] ?>">
+                                <td><?php echo $bookingsData['response']['Bookings'][$i]['reference_no'] ?></td>
+
+                                <td style="text-align:left"><?php echo substr($bookingsData['response']['Bookings'][$i]['pickup_city'], 0, 20); ?></td>
+
+                                <td style="text-align:left"><?php echo substr($bookingsData['response']['Bookings'][$i]['drop_city'], 0, 20); ?></td>
+
+                                <td style="text-align:left"><?php echo date("d M Y - h:i a", strtotime($bookingsData['response']['Bookings'][$i]['created'])); ?></td>
+
+                                <td style="text-align:left"><?php echo date("d M Y - h:i a", strtotime(explode("::",$bookingsData['response']['Bookings'][$i]['time_range'])[1])); ?><br>To<br>
+                                    <?php echo date("d M Y - h:i a", strtotime(explode("::",$bookingsData['response']['Bookings'][$i]['time_range'])[0])); ?></td>
+
+                                <td style="text-align:left"><?php echo $bookingsData['response']['Bookings'][$i]['bus_type_priority_1']; ?></td>
+
+                                <td style="text-align:left">
+                                    <?php if($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '0'){ ?>
+                                        <p style="color:orange"><i class="fa fa-circle green" style="margin-right:5px"></i>Pending</p>
+                                    <?php }elseif ($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '1') { ?>
+                                        <p style="color:blue"><i class="fa fa-circle green" style="margin-right:5px"></i>Accepted</p>
+                                    <?php }elseif ($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '2') { ?>
+                                        <p style="color:red"><i class="fa fa-circle green" style="margin-right:5px"></i>Rejected</p>
+                                    <?php }else{?>
+                                        <p style="color:green"><i class="fa fa-circle green" style="margin-right:5px"></i>Assigned</p>
+                                    <?php }?>
+                                </td>
+
+                                <?php if($_COOKIE['has_auth_level_business_spoc'] == '1') {?>
+                                    <td style="text-align:left">
+                                        <?php if(
+                                             $bookingsData['response']['Bookings'][$i]['status_auth2'] == '0' &&
+                                             $bookingsData['response']['Bookings'][$i]['status_auth1'] == '0'){ ?>
+                                            <p style="color:orange"><i class="fa fa-circle green" style="margin-right:1px"></i>Pending</p>
+                                        <?php }elseif (
+                                            $bookingsData['response']['Bookings'][$i]['status_auth2'] == '1' ||
+                                            $bookingsData['response']['Bookings'][$i]['status_auth1'] == '1') { ?>
+                                            <p style="color:blue"><i class="fa fa-circle green" style="margin-right:1px"></i>Accepted</p>
+                                        <?php }else{ ?>
+                                            <p style="color:red"><i class="fa fa-circle green" style="margin-right:1px"></i>Rejected</p>
+                                        <?php }?>
+                                    </td>
+
+                                    <td style="text-align:left">
+                                        <?php if(
+                                             $bookingsData['response']['Bookings'][$i]['status_auth2'] == '0' &&
+                                             $bookingsData['response']['Bookings'][$i]['status_auth1'] == '0'){ ?>
+                                            <p style="color:orange"></p>
+                                        <?php }elseif (
+                                            $bookingsData['response']['Bookings'][$i]['status_auth2'] == '1' ||
+                                            $bookingsData['response']['Bookings'][$i]['status_auth1'] == '1') { ?>
+                                            <p style="color:blue"><i class="fa fa-circle green" style="margin-right:1px"></i>
+                                                <?php if($bookingsData['response']['Bookings'][$i]['status_auth2'] == '1') {?>
+                                                    Approver 2
+                                                <?php }else{ ?>
+                                                    Approver 1
+                                                <?php } ?>
+                                            </p>
+                                        <?php }else{ ?>
+                                            <p style="color:red"><i class="fa fa-circle green" style="margin-right:1px"></i>
+                                                <?php if($bookingsData['response']['Bookings'][$i]['status_auth2'] == '2') {?>
+                                                    Approver 2
+                                                <?php }else{ ?>
+                                                    Approver 1
+                                                <?php } ?>
+                                            </p>
+                                        <?php }?>
+                                    </td>
+                                <?php } ?>
+
+                                <td style="text-align:left">
+                                    <?php if(
+                                         $bookingsData['response']['Bookings'][$i]['status_spoc'] == '1'){ ?>
+                                        <p style="color:blue"><i class="fa fa-circle green" style="margin-right:1px"></i>Accepted</p>
+                                    <?php }else{ ?>
+                                        <p style="color:red"><i class="fa fa-circle green" style="margin-right:1px"></i>Canceled</p>
+                                    <?php }?>
+                                </td>
+
+                                <!-- <td class="right" style="text-align:left">
+                                    <?php if($bookingsData['response']['Bookings'][$i]['is_invoice'] == '1'){ ?>
+                                    <a id="viewinvoice_group_button" style="margin-left:23px;" class=" fa-trash" href="<?php if($bookingsData['response']['Bookings'][$i]['tour_type'] == '0'){
+                                        echo '/businessspoc/viewInvoiceRadio/'.$bookingsData['response']['Bookings'][$i]['invoice_id'];} else {
+                                            echo '/businessspoc/viewInvoiceOutstation/'.$bookingsData['response']['Bookings'][$i]['invoice_id']; }?>">
+                                        <i class="glyphicon glyphicon-list-alt icon-green"></i>
+                                    </a>
+                                    <?php } ?>
+                                </td> -->
+
+                                <td class="right" style="text-align:left">
+                                    <?php $l = $bookingsData['response']['Bookings'][$i]['id']; ?>
+                                    <a id="viewbooking_group_button"  class="fa-trash" href="/businessspoc/viewBusBooking/<?php echo $l ; ?>" style="margin-left:20px;">
+                                        <i class="glyphicon glyphicon-search icon-white"></i>
+                                    </a>
+                                </td>
+
+
+                                <!-- <td class="right" style="text-align:left">
+                                    <?php $l = $bookingsData['response']['Bookings'][$i]['id']; ?>
+                                    <?php if(($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '1' || $bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] == '3') && $bookingsData['response']['Bookings'][$i]['is_invoice'] == '0' && $bookingsData['response']['Bookings'][$i]['status_spoc'] != '2' ) {?>
+                                    <a id="reject_group_button" style="" class=" fa-trash" onclick="Confirm.render('Are you sure you want to reject this booking? The current cancellation shall have cancellation charges as per applicable terms.', ' \/spocbusbooking\/reject\/<?php echo $l ?> ');">
+                                        <i class="glyphicon glyphicon-remove icon-green"></i>
+                                    </a>
+                                    <?php } ?>
+                                    <?php if($bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] != '1' && $bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi'] != '3' && $bookingsData['response']['Bookings'][$i]['is_invoice'] == '0' && $bookingsData['response']['Bookings'][$i]['status_spoc'] != '2' ) { ?>
+                                    <a id="reject_group_button" style="" class=" fa-trash" onclick="Confirm.render('Are you sure you want to reject this booking?', ' \/spocbusbooking\/reject\/<?php echo $l ?> ');">
+                                        <i class="glyphicon glyphicon-remove icon-green"></i>
+                                    </a>
+                                    <?php } ?>
+                                </td> -->
+
+                                <!-- <input type="hidden" name="status_auth_taxivaxi" id="status_auth_taxivaxi" value="<?php echo $bookingsData['response']['Bookings'][$i]['status_auth_taxivaxi']; ?>">
+
+                                <input type="hidden" name="is_invoice" id="is_invoice" value="<?php echo $bookingsData['response']['Bookings'][$i]['is_invoice']; ?>"> -->
+
+                            </tr>
+                            <?php }} ?>
+                        </tbody>
+                    </table>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    var has_auth_level_business_spoc = '<?php echo $_COOKIE["has_auth_level_business_spoc"]; ?>';
+    if(has_auth_level_business_spoc == '1')
+    {
+        $('#table_booking').DataTable({
+            'paging': true,
+            'aaSorting' : [[5, "ASC"]],
+            "columns": [
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"}
+                ]
+        });
+    }
+    else
+    {
+        $('#table_booking').DataTable({
+            'paging': true,
+            'aaSorting' : [[5, "ASC"]],
+            "columns": [
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"}
+                ]
+        });
+    }
+
+    $('#add_group_form').hide();
+    $('#edit_group_form').hide();
+
+
+    $('a').click(function(){
+        $('#my_table').show();
+        $('#add_group_form').hide();
+        $('#edit_group_form').hide();
+    });
+
+    $('#add_group_button').click(function(){
+        var gc = parseInt('<?php echo $employeesCount; ?>');
+        if(gc > 0){
+            $('#my_table').hide();
+            $('#edit_group_form').hide();
+
+            $('#group_name').val('');
+            $('#budget').val();
+            $('#auth_name').val();
+            $('#auth_email').val();
+            $('#auth_password').val();
+            $('#is_radio').attr('checked', false);
+            $('#is_outstation').attr('checked', false);
+            $('#add_group_form').show();
+        }
+        else
+        {
+            alert('No Employees Yet to make booking!! Please add Employeed to make bookings.');
+            return false;
+        }
+    });
+
+    $('#cancel_group_button, #cancel_group_button2').click(function(){
+        $('#my_table').show();
+        $('#add_group_form').hide();
+        $('#edit_group_form').hide();
+    });
+
+    $('#r').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_radio_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_radio_extra').val('Yes');
+        }
+    });
+
+    $('#l').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_local_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_local_extra').val('Yes');
+        }
+    });
+
+    $('#o').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_outstation_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_outstation_extra').val('Yes');
+        }
+    });
+
+    $('.my_row').click(function(){
+    });
+    
+    //For Delete Button
+    /*$('.my_row').mouseover(function(){
+        //If accepted by taxivaxi cannot delete
+        if($(this).find('#status_auth_taxivaxi').val() != '1' && $(this).find('#status_auth_taxivaxi').val() != '3')
+        {
+            $(this).find('#delete_group_button').show();
+        }
+    });
+
+    $('.my_row').mouseout(function(){
+        $(this).find('#delete_group_button').hide();
+    });*/
+
+    //View Invoice Button
+    /*$('.my_row').mouseover(function(){
+        if($(this).find('#is_invoice').val() == '1')
+        {
+            $(this).find('#viewinvoice_group_button').show();
+        }
+    });
+
+    $('.my_row').mouseout(function(){
+        $(this).find('#viewinvoice_group_button').hide();
+    });*/
+    
+});
+</script>
+

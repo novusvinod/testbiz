@@ -1,0 +1,156 @@
+<?php
+$invoiceData = json_decode($this->invoice, true);
+?>
+
+<style>
+div.img {
+    margin: 5px;
+    border: 1px solid #ccc;
+    float: left;
+    width: 180px;
+}
+
+div.img:hover {
+    border: 1px solid #777;
+}
+
+div.img img {
+    width: 100%;
+    height: auto;
+}
+
+div.desc {
+    padding: 15px;
+    text-align: center;
+}
+</style>
+
+<?php if($invoiceData['response']['Invoice']['duty_slip'] == ''  ) {?>
+    <form name="edit_form" role="form" action="/businesstaxivaxi/addDutySlip" method="POST" enctype="multipart/form-data">
+                    <div class="form-group" style="float:left; margin-left:350px">
+                        Browser Payin Slip:
+                        <input class="btn btn-default" type="file" name="image" id="imgInp">
+                        <input type="hidden" name="booking_id" value="<?php echo $invoiceData['response']['Invoice']['booking_id'] ; ?>">
+                    </div>
+                    <div class="form-group" style="float:right; margin-right:350px; margin-top:22px">
+                        <input value="Upload Payin Slip(JPG, JPEG, PNG)" type="submit" class="btn btn-info btn-sm" id="save_button" disabled>
+                    </div>
+                </form>
+<?php } else { ?>
+    <div class="img" style="margin-left:450px">
+        <a target="_blank" href="<?php echo $invoiceData['response']['Invoice']['duty_slip'] ; ?>">
+            <img src="<?php echo $invoiceData['response']['Invoice']['duty_slip'] ; ?>">
+        </a>
+        <div class="desc">Payin-Slip</div>
+    </div>
+<?php }?>
+
+<div class="row">
+    <div class="box col-md-12">
+    <!-- <div class="box-inner"> -->
+    <!-- <div class="box-header well" data-original-title=""> -->
+        <h2 style="margin-left:340px"><i class="glyphicon glyphicon-list-alt"></i> Invoice : <a href="/businesstaxivaxi/viewBooking/<?php echo $invoiceData['response']['Invoice']['booking_id'] ?>"> <?php echo $invoiceData['response']['Invoice']['reference_no']; ?></a></h2>
+    <!-- </div> -->
+
+	<table class="table table-striped table-bordered bootstrap-datatable datatable responsive" style="width:700px; margin-left:200px; font-size: 12px">
+
+	<!--<tr>
+        <th>Car Model</th>
+        <td><?php echo $invoiceData['response']['Invoice']['taxi_model_name']; ?></td>
+    </tr>
+
+	<tr>
+        <th>Base Fare <?php echo "(".$invoiceData['response']['Invoice']['allowed_kms']." Kms Included)"; ?></th>
+        <td><?php echo "Rs. ".$invoiceData['response']['Invoice']['base_rate']; ?></td>
+    </tr>
+    
+    <tr>
+        <th>Total Ride Time</th>
+        <td><?php echo $invoiceData['response']['Invoice']['hours_done']." Min"; ?></td>
+    </tr>
+
+ 
+
+    <tr>
+        <th>Ride Time Charges (@Rs<?php echo $invoiceData['response']['Invoice']['hour_rate'] ?>/Min)</th>
+        <td><?php echo "Rs. ".$invoiceData['response']['Invoice']['extra_hours_charge']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Total Distance</th>
+        <td><?php echo $invoiceData['response']['Invoice']['kms_done']. " Km"; ?></td>
+    </tr>
+	
+    <tr>
+        <th>Extra Kms</th>
+        <td><?php echo $invoiceData['response']['Invoice']['extra_kms']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Extra Kms Charge (@Rs<?php echo $invoiceData['response']['Invoice']['km_rate'] ?>/Km)</th>
+        <td><?php echo "Rs. ".$invoiceData['response']['Invoice']['extra_kms_charge']; ?></td>
+    </tr>
+    <tr>
+        <th>Total (Excluding Tax)</th>
+        <td><?php echo "Rs. ".$invoiceData['response']['Invoice']['total_ex_tax']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Tax (@<?php echo $invoiceData['response']['Invoice']['tax_rate']; ?>%)</th>
+        <td><?php echo $invoiceData['response']['Invoice']['tax']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Total</th>
+        <td><?php echo $invoiceData['response']['Invoice']['total']; ?></td>
+    </tr>
+    
+    <tr>
+        <th>Extras (Parking, Toll Tax, etc)</th>
+        <td><?php echo "Rs. ".$invoiceData['response']['Invoice']['extras']; ?></td>
+    </tr>-->
+    
+	<tr style="border:2px solid #4CFF00">
+        <th>Total</th>
+        <td><strong><?php $total= $invoiceData['response']['Invoice']['total'] ; echo "Rs. ".$total; ?></strong></td>
+    </tr>
+    <tr>
+        <th>Management Fee (@<?php echo $invoiceData['response']['Invoice']['taxivaxi_rate'] ?>%)</th>
+        <td><?php echo "Rs. ".$invoiceData['response']['Invoice']['taxivaxi_charge']; ?></td>
+    </tr>
+
+    <tr>
+        <th>Service Tax (@<?php echo $invoiceData['response']['Invoice']['taxivaxi_tax_rate'] ?>%)</th>
+        <td><?php echo "Rs. ".$invoiceData['response']['Invoice']['taxivaxi_tax_charge']; ?></td>
+    </tr>
+	<tr>
+        <th>&nbsp;</th>
+        <td>&nbsp;</td>
+    </tr>
+    <tr style="border:2px solid green">
+        <th>Sub Total</th>
+        <td><strong><?php echo "Rs. ".$invoiceData['response']['Invoice']['sub_total']; ?></strong></td>
+    </tr>
+
+   
+    </table>
+    </div>
+    </div>
+    </div>
+    <!--/span-->
+
+    </div><!--/row-->
+<script>
+$(document).ready(
+    function(){
+        $('input:file').change(
+            function(){
+                if ($(this).val()) {
+                    $('input:submit').attr('disabled',false);
+                    // or, as has been pointed out elsewhere:
+                    // $('input:submit').removeAttr('disabled'); 
+                } 
+            }
+            );
+    });
+</script>

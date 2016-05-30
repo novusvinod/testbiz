@@ -1,0 +1,49 @@
+<?php if(isset($_COOKIE['success'])) { ?>
+    <div class="alert alert-success alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <?php echo $_COOKIE['success'] ?>
+    </div>
+<?php } ?>
+<?php if(isset($_COOKIE['fail'])) { ?>
+    <div class="alert alert-danger alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <?php echo $_COOKIE['fail'] ?>
+    </div>
+<?php } ?>
+
+<?php
+    $type = $this->type;
+?>
+
+<?php echo $this->mess ;?>
+
+<div id="my_table">
+    <div style="text-align:center; font-weight:bold; font-size:18px;">
+        <?php if($type=='1'){echo 'Add comment for Taxi Invoice';} elseif($type=='2') echo 'Add comment for Bus Invoice'; ?>
+    </div>
+
+    <div class="row" style="margin-left:200px; margin-right:200px">
+    <div class="box col-md-12">
+        <div class="box-inner" style="margin-left:120px; margin-right:100px;margin-bottom:20px">
+            <div class="box-header" data-original-title="">
+                <h5 class="box-title"> Comment Form </h5>
+            </div>
+            <div class="box-content">
+
+            <form id="add-operator-form" role="form" action="<?php if($type == '1') echo '/businessadmin/commentInvoice'; else echo '/businessadmin/commentBusInvoice'; ?>" method="POST">
+                <input type="hidden" value="<?php echo $this->invoice_id; ?>" name="invoice_id">
+                <input type="hidden" value="<?php echo $this->type; ?>" name="type">
+                <div class="form-group">
+                    <label for="pickup_location">Add comment for TaxiVaxi</label>
+                    <textarea rows="4" cols="50" class="form-control" name="comment" 
+                    maxlength="1500" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-warning">Sumbit</button>
+                <br><br>
+            </form>
+        </div>
+    </div>
+</div>
+

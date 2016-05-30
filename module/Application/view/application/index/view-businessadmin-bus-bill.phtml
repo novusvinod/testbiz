@@ -1,0 +1,160 @@
+<?php
+$details = json_decode($this->details, true);
+$billDetails = $details['response']['Bill'];
+$bill_id = $billDetails['bill_reference_no'];
+$invoicesDetail = $details['response']['Invoices'];
+$col1 = 0;
+$col2 = 0;
+$col3 = 0;
+$col4 = 0;
+$t = 0;
+?>
+
+<style type="text/css" media="print">
+  a[href]:after {
+    content: none !important;
+  }
+  #Header, #Footer { display: none !important; }
+  #print_button { display: none !important; }
+</style>
+
+    <section class="invoice">
+          <!-- title row -->
+          <div class="row" style="padding:20px">
+            <div class="col-xs-12">
+              <h2 class="page-header" style="font-size:14px">
+                <i class=""></i> Taxivaxi
+                <medium class="pull-right">Billing Date: <?php echo date("d M Y", strtotime($billDetails['created_at'])); ?> </medium>
+              </h2>
+            </div><!-- /.col -->
+          </div>
+          <!-- info row -->
+          <div class="row invoice-info" style="padding:20px">
+            <div class="col-sm-4 invoice-col">
+              From
+              <address>
+                <strong>BAI Infosolutions Private Limited</strong><br>
+                1/1075/1/2 GF4, Mehrauli<br>
+                New Delhi 110030<br>
+                India
+              </address>
+            </div><!-- /.col -->
+            <div class="col-sm-4 invoice-col">
+              To
+              <address>
+                <strong><?php echo $billDetails['billing_name']; ?></strong><br>
+                <?php echo $billDetails['billing_address_line1']; ?><br> 
+                <?php echo $billDetails['billing_address_line2']; ?><br>
+                <?php echo $billDetails['billing_address_line3']; ?>
+              </address>
+            </div><!-- /.col -->
+            <div class="col-sm-4 invoice-col">
+              <b>Bill Id: <?php echo $billDetails['bill_reference_no']; ?></b><br><br>
+              <b>Service Tax No:</b> AAGCB3556PSD001<br>
+              <b>PAN No:</b> AAGCB3556P<br>
+              <b>CIN No:</b> U72200DL2015PTC283027
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+
+          <!-- Table row -->
+          <div class="row" style="padding:20px">
+            <div class="col-xs-12 table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr style="text-align:left">
+                    <th>Booking Id</th>
+                    <th style="text-align:right">Bus Ticket Price(Rs.)</th>
+		    <th style="text-align:right">Management Fee(Rs.)</th>
+                    <th style="text-align:right">Service Tax on<br>Management Fee(Rs.)</th>
+                    <th style="text-align:right">Total(Rs.)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <?php for($i=0; $i<count($invoicesDetail); $i++) { 
+                      $invoice_id = $invoicesDetail[$i]['id'] ?>
+                      <tr style="text-align:right">
+                        <td style="text-align:left">
+                            <a href="/businessadmin/viewBusBooking/<?php echo $invoicesDetail[$i]['booking_id']; ?>">
+                                <?php echo $invoicesDetail[$i]['reference_no']; ?>
+                            </a>
+                        </td>
+                        <td>
+                            <?php 
+                              $t = (float)($invoicesDetail[$i]['total']);
+                              $col1 = $col1 + $t;
+                              echo number_format($t, 2, '.', ''); 
+                            ?>
+                        </td>
+                        <td>
+                            <?php 
+                              $t = (float)($invoicesDetail[$i]['taxivaxi_charge']);
+                              $col2 = $col2 + $t;
+                              echo number_format($t, 2, '.', ''); 
+                            ?>
+                        </td>
+                        <td>
+                            <?php 
+                              $t = (float)($invoicesDetail[$i]['taxivaxi_tax_charge']);
+                              $col3 = $col3 + $t;
+                              echo number_format($t, 2, '.', ''); 
+                            ?>
+                        </td>
+                        <td>
+                            <a href="<?php 
+                                echo '/businessadmin/viewBusinvoice/'.$invoice_id ; ?> "> 
+                                <?php 
+                                  $t = (float)$invoicesDetail[$i]['sub_total'];
+                                  $col4 = $col4 + $t;
+                                  echo number_format($t, 2, '.', ''); 
+                                ?>
+                            </a>
+                        </td>
+                      </tr>
+                    <?php } ?>
+                    <tr style="text-align:right">
+                        <td></td>
+                        <td><?php echo "Rs.".$col1; ?></td>
+                        <td><?php echo "Rs.".$col2; ?></td>
+                        <td><?php echo "Rs.".$col3; ?></td>
+                        <td><b><?php echo "Rs.".$col4; ?></b></td>
+                      </tr>
+                </tbody>
+              </table>
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+
+          <div style="padding:20px; border:1px solid">
+            
+            For BAI Infosolutions Private Ltd<br><br><br><br>
+            Authorized Signatory<br>
+          </div>
+
+          <div class="col-xs-12" id="print_button" style="padding:20px">
+            <a class="btn btn-default"><i class="fa fa-print"></i> Print</a>
+          </div>
+          <!-- this row will not appear when printing -->
+          <div class="row no-print">
+            
+          </div>
+        </section><!-- /.content -->
+
+
+<script>
+$(document).ready(
+    function(){
+        $('input:file').change(
+            function(){
+                if ($(this).val()) {
+                    $('input:submit').attr('disabled',false);
+                    // or, as has been pointed out elsewhere:
+                    // $('input:submit').removeAttr('disabled'); 
+                } 
+            }
+            );
+    });
+
+  $('#print_button').click(function(){
+    document.title = 'New Bill ' + '<?php echo $bill_id;?>';
+    window.print();
+  });
+</script>

@@ -1,0 +1,340 @@
+<?php if(isset($_COOKIE['success'])) { ?>
+    <div class="alert alert-success alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <?php echo $_COOKIE['success'] ?>
+    </div>
+<?php } ?>
+
+<?php
+    $peopleData = json_decode($this->employees, true);
+    if(isset($peopleData['response'])){
+        $peopleCount = count($peopleData['response']['People']);
+        // $max_budget = floatval($peopleData['response']['Groups'][0]['admin_budget']) - floatval($peopleData['response']['Groups'][0]['admin_allocated']);
+    }
+    else{
+        $peopleCount = 0;
+        // $max_budget = floatval($peopleData['admin_budget']);
+    }
+
+    $spocData = json_decode($this->spocs, true);
+    $spocCount;
+    if(isset($spocData['response'])){
+        $spocCount = count($spocData['response']['Employees']);
+    }
+    else{
+        $spocCount = 0;
+    }
+?>
+
+<?php echo $this->mess ;?>
+
+<div id="my_table">
+    <div style="text-align:center; font-weight:bold; font-size:18px;">Employees</div>
+    <div style="float:right; width:200px; margin-right:10px;">
+        <button class="btn btn-info btn-block" id="add_group_button">ADD New Employee</button>
+    </div>
+
+    <div class="row" style="padding-top:50px">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"></h3>
+                </div><!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-striped table-bordered datatable" id="table_booking">
+                        <thead>
+                            <tr style="width:100%; font-size:15px">
+                                <th style="width:10%" class="text-left">EMPLOYEE ID</th>
+                                <th style="width:15%" class="text-left">EMPLOYEE NAME</th>
+                                <th style="width:20%" class="text-left">EMPLOYEE EMAIL</th>
+                                <th style="width:10%" class="text-left">EMPLOYEE CONTACT</th>
+                                <th style="width:20%" class="text-left">GROUP NAME</th>
+                                <th style="width:10%" class="text-left">SUBGROUP NAME</th>
+                                <th style="width:10%" class="text-left">SPOC NAME</th>
+                                <!-- <th style="width:5%; text-align:center"></th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php for($i=0; $i<$peopleCount; $i++){ ?>
+                            <tr style="font-size:13px; cursor:pointer" class="my_row" id="<?php echo $peopleData['response']['People'][$i]['id'] ?>">
+                                <td><?php echo $peopleData['response']['People'][$i]['people_cid'] ?></td>
+                                <td><?php echo $peopleData['response']['People'][$i]['people_name'] ?></td>
+                                <td><?php echo $peopleData['response']['People'][$i]['people_email'] ?></td>
+                                <td><?php echo $peopleData['response']['People'][$i]['people_contact'] ?></td>
+                                <td><?php echo $peopleData['response']['People'][$i]['group_name'] ?></td>
+                                <td><?php echo $peopleData['response']['People'][$i]['subgroup_name'] ?></td>
+                                <td><?php echo $peopleData['response']['People'][$i]['spoc_name'] ?></td>
+                                
+                                <!-- <td class="center">
+                                    <?php $l = $peopleData['response']['People'][$i]['id']; ?>
+                                    <a id="delete_group_button" style="display:none" class=" fa-trash" onclick="Confirm.render('Delete this Employee?', ' \/employee\/delete\/<?php echo $l ?> ');">
+                                        <i class="glyphicon glyphicon-trash icon-white"></i>
+                                    </a>
+                                </td> -->
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+    </div>
+</div>
+
+<!-- <div class="row" style="margin-left:200px; margin-right:200px">
+    <div class="box col-md-12">
+        <div class="box-inner" style="margin-left:120px; margin-right:100px;margin-bottom:20px"> -->
+
+<div id="add_group_form" class="box box-primary" style="width:900px; margin-left:200px">
+    <div class="box-header">
+        <h3 class="box-title">ADD New Employee</h3>
+    </div><!-- /.box-header -->
+    <!-- form start -->
+    <form action="/postAddEmployee" method="POST" role="form" id="add_employee_form">
+        <div class="box-body">
+
+            <div class="form-group">
+                <label for="group_name">Employee Id</label>
+                <input type="text" class="form-control" name="people_cid" id="people_cid" placeholder="Employee Id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="group_name">Employee Name</label>
+                <input type="text" class="form-control" name="people_name" id="people_name" placeholder="Employee Name" required>
+            </div>
+
+            <div class="form-group">
+                                <label for="driver_contact">Employee Contact No </label><br>
+                                <input type="text" class="form-control" value="+91" disabled style="width:7%; float:left;">
+
+                                <input  style="width:90%; float:right;" class="form-control" name="people_contact" id="people_contact" placeholder="Contact No" required type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                            </div><br><br>
+
+            <div class="form-group" style="clear:left;">
+                <label for="group_name">Employee Email</label>
+                <input type="email" class="form-control email_check" name="people_email" id="people_email" placeholder="Employee Email" required>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="selectError">Spoc</label>
+                    <div class="controls">
+                        <select name="user_id" id="user_id" data-rel="chosen" required>
+                            <option selected value="">Select</option>
+                            <?php for($x=0; $x<$spocCount; $x++){ ?>
+                            <option value="<?php echo $spocData['response']['Employees'][$x]['id'] ?>"><?php echo $spocData['response']['Employees'][$x]['user_name']."(Group-".$spocData['response']['Employees'][$x]['group_name'].")"; ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </label>
+            </div><br>
+
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="btn btn-primary" style="color:yellow; background-color:black" id="cancel_group_button">Cancel</div>
+        </div>
+    </form>
+</div>
+
+<div id="try_group_form"></div>
+
+<div id="edit_group_form" class="box box-primary">
+    <div class="box-header">
+        <h3 class="box-title">Edit Employee</h3>
+    </div><!-- /.box-header -->
+    <!-- form start -->
+    <form action="/postEditEmployee" method="POST" role="form">
+        <input type="hidden" name="edit_people_id" id="edit_people_id">
+        <div class="box-body">
+
+            <div class="form-group">
+                <label for="group_name">Employee Id</label>
+                <input type="text" class="form-control" name="edit_people_cid" id="edit_people_cid" placeholder="Employee Id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="group_name">Employee Name</label>
+                <input type="text" class="form-control" name="edit_people_name" id="edit_people_name" placeholder="Employee Name" required>
+            </div>
+
+            <div class="form-group">
+                                <label for="driver_contact">Employee Contact No </label><br>
+                                <input type="text" class="form-control" value="+91" disabled style="width:50px; float:left;">
+
+                                <input  style="width:95%; float:right;" class="form-control" name="edit_people_contact" id="edit_people_contact" placeholder="Contact No" required type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                            </div><br><br>
+
+            <div class="form-group" style="clear:left;">
+                <label for="group_name">Employee Email</label>
+                <input type="email" class="form-control" name="edit_people_email" id="edit_people_email" placeholder="Employee Email" required>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="edit_group_id">Sub-Group</label>
+                    <div class="controls">
+                        <select name="edit_user_id" id="edit_user_id" data-rel="chosen" readonly>
+                            <option selected value="">Select</option>
+                            <?php for($x=0; $x<$spocCount; $x++){ ?>
+                            <option value="<?php echo $spocData['response']['Employees'][$x]['id'] ?>"><?php echo $spocData['response']['Employees'][$x]['user_name']."(Group-".
+                            $spocData['response']['Employees'][$x]['group_name'].")"; ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </label>
+            </div><br>
+
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="btn btn-primary" style="color:yellow; background-color:black" id="cancel_group_button2">Cancel</div>
+        </div>
+    </form>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    $('#table_booking').DataTable({
+        'paging': true,
+        'aaSorting' : [],
+        "columns": [
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"},
+                {"orderDataType": "dom-text-numeric"}
+            ]
+    });
+
+    var global_people_id;
+    var global_people_user_id;
+
+    $('#add_group_form').hide();
+    $('#edit_group_form').hide();
+
+    $('a').click(function(){
+        $('#my_table').show();
+        $('#add_group_form').hide();
+        $('#edit_group_form').hide();
+    });
+
+    $('#add_group_button').click(function(){
+        var sp = parseInt('<?php echo $spocCount; ?>');
+        if(sp > 0){
+            $('#my_table').hide();
+            $('#edit_group_form').hide();
+
+            $('#people_cid').val('');
+            $('#people_name').val('');
+            $('#people_email').val('');
+
+            $('#add_group_form').show();
+        }
+        else
+        {
+            alert('Please add Groups, Sub-groups and Spoc first in order to add Employees');
+        }
+    });
+
+    $('#cancel_group_button, #cancel_group_button2').click(function(){
+        $('#my_table').show();
+        $('#add_group_form').hide();
+        $('#edit_group_form').hide();
+    });
+
+    //*********
+    //edit
+    $('.my_row').click(function(){
+
+        var fun = (function(at, pi){
+            jQuery.ajax({
+                        url: 'http://taxivaxi.in/business/api/viewPeople',
+                        type: 'post',
+                        data: {
+                            access_token: at,
+                            people_id: pi
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            if(data.success == '0')
+                            {
+                                alert('No such Employee found. Please select another');
+                            }
+                            else
+                            {
+                                $('#edit_people_id').val('');
+                                $('#edit_people_cid').val('');
+                                $('#edit_people_name').val('');
+                                $('#edit_people_email').val('');
+                                $('#edit_people_contact').val('');
+                
+                                var People = data.response.People;
+
+                                global_spoc_user_id = People.user_id;
+                                
+                                $('#edit_people_id').val(People.id);
+                                $('#edit_people_cid').val(People.people_cid);
+                                $('#edit_people_name').val(People.people_name);
+                                $('#edit_people_contact').val(People.people_contact);
+                                $('#edit_people_email').val(People.people_email);
+
+                                $("#edit_user_id option").each(function()
+                                {
+                                    // Add $(this).val() to your list
+                                    if($(this).val() == People.user_id)
+                                    {
+                                        $(this).attr('selected', true);
+                                    }
+                                });
+                            }
+                        },
+                        error: function(data)
+                        {
+                        }
+                    });
+        });
+
+        var pi = parseInt($(this).attr('id'));
+        global_people_id = pi;
+        var at = '<?php echo $_COOKIE["access_token_business_admin"]?>' ;
+
+        fun(at, pi);
+        $('#my_table').show();
+        // $('#add_group_form').hide();
+        // $('#edit_group_form').show(); 
+    });
+    
+    //For Delete Button
+    $('.my_row').mouseover(function(){
+        $(this).find('a').show();
+    });
+
+    $('.my_row').mouseout(function(){
+        $(this).find('a').hide();
+    });
+
+    /*$('.email_check').keyup(function() {
+        $('span.error-keyup-7').remove();
+        var inputVal = $(this).val();
+        var emailReg = /^[a-z0-9]{2,}@tcs\.com$/;
+        if(!emailReg.test(inputVal)) {
+            $(this).after('<span class="error error-keyup-7">Invalid Email Format.</span>');
+        }
+    });
+
+    $("#add_employee_form").submit(function() {
+        var inputVal = $('#people_email').val();
+        var pattern = /^[a-z0-9]{2,}@tcs\.com$/;
+        if (pattern.test(inputVal)) {
+            return true;
+        } else {
+            alert('Not a valid Email (TCS Only!!)');
+            return false;
+        }
+
+    });*/
+
+    
+});
+</script>

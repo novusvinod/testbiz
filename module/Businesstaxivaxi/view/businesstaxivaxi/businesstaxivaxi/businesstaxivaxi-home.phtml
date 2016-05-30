@@ -1,0 +1,181 @@
+<?php
+$bookingsData = json_decode($this->details, true);
+?>
+
+<!-- Small boxes (Stat box) -->
+<div class="row">
+
+    <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                <h3>
+                    <?php echo $bookingsData['response']['Bookings']['bk_count']; ?>
+                </h3>
+                <p>
+                    Total Taxi Bookings
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-pie-graph"></i>
+            </div>
+            <a href="/businesstaxivaxi/bookings" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-red">
+            <div class="inner">
+                <h3>
+                    <?php echo $bookingsData['response']['Unassigned']['un_ass_bk_count']; ?>
+                </h3>
+                <p>
+                    Unassigned Taxi Bookings
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-ios7-cart"></i>
+            </div>
+            <a href="/businesstaxivaxi/bookings" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-lime">
+            <div class="inner">
+                <h3>
+                    <?php echo $bookingsData['response']['Amount']['invoice_count']; ?>
+                </h3>
+                <p>
+                    Taxi Invoices Generated
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-document"></i>
+            </div>
+            <a href="/businesstaxivaxi/invoices" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+    <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-green">
+            <div class="inner">
+                <h3>
+                    Rs.<?php echo number_format((float)$bookingsData['response']['Amount']['invoice_amount'],2, '.', ''); ?><sup style="font-size: 20px"></sup>
+                </h3>
+                <p>
+                    Total Taxi Invoice Amount
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-calculator"></i>
+            </div>
+            <a href="/businesstaxivaxi/invoices" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+
+
+
+
+
+
+    <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                <h3>
+                    <?php echo $bookingsData['response']['BusBookings']['bk_count']; ?>
+                </h3>
+                <p>
+                    Total Bus Bookings
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-pie-graph"></i>
+            </div>
+            <a href="/businesstaxivaxi/busbookings" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-red">
+            <div class="inner">
+                <h3>
+                    <?php echo $bookingsData['response']['BusUnassigned']['un_ass_bk_count']; ?>
+                </h3>
+                <p>
+                    Unassigned Bus Bookings
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-ios7-cart"></i>
+            </div>
+            <a href="/businesstaxivaxi/busbookings" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-lime">
+            <div class="inner">
+                <h3>
+                    <?php echo $bookingsData['response']['BusAmount']['invoice_count']; ?>
+                </h3>
+                <p>
+                    Bus Invoices Generated
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-document"></i>
+            </div>
+            <a href="/businesstaxivaxi/businvoices" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-green">
+            <div class="inner">
+                <h3>
+                    Rs.<?php echo number_format((float)$bookingsData['response']['BusAmount']['invoice_amount'], 2, '.', ''); ?><sup style="font-size: 20px"></sup>
+                </h3>
+                <p>
+                    Total Bus Invoice Amount
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-calculator"></i>
+            </div>
+            <a href="/businesstaxivaxi/businvoices" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+
+
+
+    
+</div><!-- /.row -->
+
+<!-- top row -->
+<div class="row">
+    <div class="col-xs-12 connectedSortable">
+        <?php echo $this->m; ?>        
+    </div><!-- /.col -->
+</div>
+<!-- /.row -->

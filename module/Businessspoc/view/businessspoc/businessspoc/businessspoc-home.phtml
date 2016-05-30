@@ -1,0 +1,75 @@
+<?php
+$bookingsData = json_decode($this->details, true);
+// var_dump($bookingsData);
+?>
+
+<!-- Small boxes (Stat box) -->
+<div class="row">
+
+    <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-red">
+            <div class="inner">
+                <h3>
+                    <?php echo $bookingsData['response']['Bookings']['bk_count']; ?>
+                </h3>
+                <p>
+                    Bookings
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-pie-graph"></i>
+            </div>
+            <a href="/businessspoc/bookings" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+
+    <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-yellow">
+            <div class="inner">
+                <h3>
+                    <?php echo $bookingsData['response']['Amount']['invoice_count']; ?>
+                </h3>
+                <p>
+                    Invoices Generated
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-pie-graph"></i>
+            </div>
+            <a href="/businessspoc/invoices" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+    <!-- <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-green">
+            <div class="inner">
+                <h3>
+                    Rs.<?php echo round($bookingsData['response']['Amount']['invoice_amount'], 2); ?><sup style="font-size: 20px"></sup>
+                </h3>
+                <p>
+                    Total Invoice Amount
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-stats-bars"></i>
+            </div>
+            <a href="/businessspoc/invoices" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div> -->
+    
+</div><!-- /.row -->
+
+<!-- top row -->
+<div class="row">
+    <div class="col-xs-12 connectedSortable">
+        <?php echo $this->m; ?>        
+    </div><!-- /.col -->
+</div>
+<!-- /.row -->

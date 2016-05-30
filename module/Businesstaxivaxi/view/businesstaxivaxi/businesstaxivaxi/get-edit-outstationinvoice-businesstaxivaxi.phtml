@@ -1,0 +1,359 @@
+<?php 
+
+    // var_dump($this->booking);
+    $invoiceData = json_decode($this->invoice, true);
+?>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+
+<?php if(isset($_COOKIE['error'])) { ?>
+
+        <div class="box-content alerts" style="width:200px; margin:0 auto;">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong><?php echo $_COOKIE['error'] ?></strong>
+                </div>
+            </div>
+    <?php } ?>
+<br>
+<?php if($this->mess != "") { ?>
+
+        <div class="box-content alerts" style="width:400px; margin-left:435px;">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong><?php echo $this->mess ?></strong>
+                </div>
+            </div>
+    <?php } ?>
+<div class="row">
+    <div class="box col-md-12">
+        <div class="box-inner">
+            <div class="box-header" data-original-title="">
+                <h2 style="margin-left:400px; font-weight:bold" class="box-title">Edit Invoice : <?php echo $invoiceData['response']['Invoice']['reference_no'] ?></h2>
+            </div>
+            <div class="box-content">
+                <form id="add-operator-form" role="form" action="/postEditInvoiceOutstation" method="POST">
+                    <input name="invoice_id" value="<?php echo $this->invoice_id; ?>" type="hidden">
+                    
+                    <div class="form-group">
+                                <label for="pickup_location">Tour Type</label>
+                                <input type="text" class="form-control" name="tour_type" id="tour_type" 
+                                value="<?php echo $invoiceData['response']['Invoice']['tour_type'] ?>" readonly>
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Package</label>
+                                <input type="text" class="form-control" name="rate_name" id="rate_name" 
+                                value="<?php echo $invoiceData['response']['Invoice']['rate_name'] ?>" readonly>
+                            </div>
+                    <input type="hidden" name="rate_id" value="<?php echo $invoiceData['response']['Invoice']['rate_id'] ;?>">
+
+                    <div class="form-group">
+                                <label for="pickup_location">Pickup Date(YYYY-MM-DD)</label>
+                                <input type="text" class="form-control" name="pickup_date" id="pickup_date" 
+                                value="<?php echo $invoiceData['response']['Invoice']['pickup_date'] ?>">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Pickup Time(HH:MM:SS)</label>
+                                <input type="text" class="form-control" name="pickup_time" id="pickup_time" 
+                                value="<?php echo $invoiceData['response']['Invoice']['pickup_time'] ?>">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Drop Date(YYYY-MM-DD)</label>
+                                <input type="text" class="form-control" name="drop_date" id="drop_date" 
+                                value="<?php echo $invoiceData['response']['Invoice']['drop_date'] ?>" required>
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Drop Time(HH:MM:SS)</label>
+                                <input type="text" class="form-control" name="drop_time" id="drop_time" 
+                                value="<?php echo $invoiceData['response']['Invoice']['drop_time'] ?>" required>
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Total Days Done</label>
+                                <input type="number" class="form-control" name="hours_done" id="hours_done" 
+                                value="<?php echo $invoiceData['response']['Invoice']['hours_done'] ?>" readonly style="border:1px solid red">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Starting km</label>
+                                <input type="number" class="form-control" name="start_km" id="start_km" 
+                                value="<?php echo $invoiceData['response']['Invoice']['start_km'] ?>" required step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Ending km</label>
+                                <input type="number" class="form-control" name="end_km" id="end_km" 
+                                value="<?php echo $invoiceData['response']['Invoice']['end_km'] ?>" required step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Total Kms Done</label>
+                                <input type="number" class="form-control" name="kms_done" id="kms_done" 
+                                value="<?php echo $invoiceData['response']['Invoice']['kms_done'] ?>" readonly style="border:1px solid red" step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Allowed Kms</label>
+                                <input type="number" class="form-control" name="allowed_kms" id="allowed_kms" 
+                                value="<?php echo $invoiceData['response']['Invoice']['allowed_kms'] ?>" readonly step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Extra Kms</label>
+                                <input type="number" class="form-control" name="extra_kms" id="extra_kms" 
+                                value="<?php echo $invoiceData['response']['Invoice']['extra_kms'] ?>" readonly style="border:1px solid red" step="0.01">
+                            </div>
+
+
+                    
+                    <div class="form-group">
+                                <label for="pickup_location">Charge/Extra Km</label>
+                                <input type="number" class="form-control" name="km_rate" id="km_rate" 
+                                value="<?php echo $invoiceData['response']['Invoice']['km_rate'] ?>"  readonly step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Extra Charge for Kms</label>
+                                <input type="number" class="form-control" name="extra_kms_charge" id="extra_kms_charge"   readonly style="border:1px solid green" step="0.01"
+                                value="<?php echo $invoiceData['response']['Invoice']['extra_kms_charge'] ?>">
+                            </div>  
+
+                   
+
+                    <div class="form-group">
+                                <label for="pickup_location">Driver Charges</label>
+                                <input type="number" class="form-control" name="driver" id="driver" 
+                                value="<?php echo $invoiceData['response']['Invoice']['driver'] ?>" readonly step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Base Fare</label>
+                                <input type="number" class="form-control" name="base_rate" id="base_rate" 
+                                value="<?php echo $invoiceData['response']['Invoice']['base_rate'] ?>"  readonly step="0.01" >
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Total = Base Fare + Driver Allowance + Extra Km Charge + Extra Hours Charge (Excluding Tax)</label>
+                                <input type="number" class="form-control" name="total_ex_tax" id="total_ex_tax" 
+                                value="<?php echo $invoiceData['response']['Invoice']['total_ex_tax'] ?>" readonly>
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Tax Rate(%)</label>
+                                <input type="number" class="form-control" name="tax_rate" id="tax_rate" 
+                                value="<?php echo $invoiceData['response']['Invoice']['tax_rate'] ?>" readonly step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Tax</label>
+                                <input type="number" class="form-control" name="tax" id="tax" 
+                                value="<?php echo $invoiceData['response']['Invoice']['tax'] ?>" readonly >
+                            </div>
+
+					 <div class="form-group">
+                                <label for="pickup_location">Others (Parking, Toll Tax etc.)</label>
+                                <input type="number" class="form-control" name="parking" id="parking" 
+                                value="<?php echo $invoiceData['response']['Invoice']['parking'] ?>"  required step="0.01">
+                            </div> 
+                            
+                    <div class="form-group">
+                                <label for="pickup_location">Total = Total + Tax + Others</label>
+                                <input type="number" class="form-control" name="total" id="total" 
+                                value="<?php echo $invoiceData['response']['Invoice']['total']  ?>" readonly
+                                style="border:1px solid green">
+                            </div>                          
+					
+					<div class="form-group">
+                                <label for="pickup_location">Management Fee(@100)</label>
+                                <input type="number" class="form-control" name="taxivaxi_charge" 
+                                id="taxivaxi_charge" 
+                                value="<?php echo $invoiceData['response']['Invoice']['taxivaxi_charge'] ?>" readonly required step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Service Tax Rate</label>
+                                <input type="number" class="form-control" name="taxivaxi_tax_rate" 
+                                id="taxivaxi_tax_rate" readonly
+                                value="<?php echo $invoiceData['response']['Invoice']['taxivaxi_tax_rate'] ?>" step="0.01">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Service Tax</label>
+                                <input type="number" class="form-control" name="taxivaxi_tax_charge" id="taxivaxi_tax_charge" 
+                                value="<?php echo $invoiceData['response']['Invoice']['taxivaxi_tax_charge'] ?>" readonly  step="0.01">
+                            </div>
+                            
+					 <div class="form-group">
+                                <label for="pickup_location">Sub Total = Total + Managemnet Fees (With Tax)</label>
+                                <input type="number" class="form-control" name="sub_total" id="sub_total" 
+                                value="<?php echo $invoiceData['response']['Invoice']['sub_total'] ?>" readonly
+                                style="border:1px solid green">
+                            </div>    
+
+                            <!-- <input type="hidden" name="user_name" id="user_name"> -->
+                    <button type="submit" class="btn btn-warning">DONE</button>
+                    <br><br>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--/span-->
+
+</div><!--/row-->
+
+
+
+    <script>
+    
+
+    $(document).ready(function() {
+
+        $('#drop_date,#pickup_date').daterangepicker({
+            "singleDatePicker": true,
+            "timePicker": false,
+            locale: {
+              format: 'YYYY-MM-DD'
+            }
+        });
+
+        $('#drop_time,#pickup_time').daterangepicker({
+            "singleDatePicker": true,
+            "timePicker": true,
+            locale: {
+              format: 'HH:mm:ss'
+            }
+        });
+
+        $("#drop_date,#drop_time,#pickup_date,#pickup_time,#start_km,#end_km,#parking,#tax_rate,#taxivaxi_tax_rate,#taxivaxi_charge").change(function()
+                {
+                    var pickup_date = $('#pickup_date').val();
+                    var pickup_time = $('#pickup_time').val();
+        
+                    var drop_date = $('#drop_date').val();
+                    var drop_time = $('#drop_time').val();         
+                    
+                    var hours_done = parseFloat($('#hours_done').val()).toFixed(2);
+
+                    var start_km = parseFloat($('#start_km').val()).toFixed(2);
+                    var end_km = parseFloat($('#end_km').val()).toFixed(2);
+                    var kms_done = parseFloat($('#kms_done').val()).toFixed(2);
+
+                    var allowed_kms = parseFloat($('#allowed_kms').val()).toFixed(2);
+                    var extra_kms = parseFloat($('#extra_kms').val()).toFixed(2);
+
+                    var km_rate = parseFloat($('#km_rate').val()).toFixed(2);
+                    var extra_kms_charge = parseFloat($('#extra_kms_charge').val()).toFixed(2);
+
+                    var parking = parseFloat($('#parking').val()).toFixed(2);
+                    var driver = parseFloat($('#driver').val()).toFixed(2);
+                    var base_rate = parseFloat($('#base_rate').val()).toFixed(2);
+                    var total_ex_tax = parseFloat($('#total_ex_tax').val()).toFixed(2);
+
+                    var tax_rate = parseFloat($('#tax_rate').val()).toFixed(2);
+                    var tax = parseFloat($('#tax').val()).toFixed(2);
+
+                    var total = parseFloat($('#total').val()).toFixed(2);
+                    
+                    var taxivaxi_charge = parseFloat($('#taxivaxi_charge').val()).toFixed(2);
+                    var taxivaxi_tax_rate = parseFloat($('#taxivaxi_tax_rate').val()).toFixed(2);
+                    var taxivaxi_tax_charge = parseFloat($('#taxivaxi_tax_charge').val()).toFixed(2);
+
+                    var sub_total = parseFloat($('#sub_total').val()).toFixed(2);
+                    
+                    $('#tax_rate').val(5.8);
+                    $('#taxivaxi_charge').val(100);
+                    $('#taxivaxi_tax_rate').val(14.5);
+
+                    var at = '<?php echo $_COOKIE["access_token_business_taxivaxi"]?>' ;
+
+                    pickup_obj = new Date(pickup_date.split("-")[0], pickup_date.split("-")[1], pickup_date.split("-")[2],
+                        pickup_time.split(":")[0], pickup_time.split(":")[1], pickup_time.split(":")[2]);
+
+                    drop_obj = new Date(drop_date.split("-")[0], drop_date.split("-")[1], drop_date.split("-")[2],
+                        drop_time.split(":")[0], drop_time.split(":")[1], drop_time.split(":")[2]);
+
+                    if(drop_date&&drop_time)
+                    {
+                        //No of Days Calculation
+                        function parseDate(str) {
+                            var mdy = str.split('-')
+                            return new Date(mdy[0], mdy[1]-1, mdy[2]);
+                        }
+
+                        function daydiff(first, second) {
+                            return Math.round((second-first)/(1000*60*60*24));
+                        }
+
+                        //hours_done -> days done
+                        hours_done = daydiff(parseDate(pickup_date), parseDate(drop_date))+1;
+                        $('#hours_done').val(hours_done);
+
+                        var night_rate = '<?php echo $invoiceData["response"]["BookingDetails"]["night_rate"]?>';
+                        driver = night_rate * hours_done;
+                        $('#driver').val(driver);
+
+                        //Base Fare
+                        var base_rate_one_day = '<?php echo $invoiceData["response"]["BookingDetails"]["base_rate"]?>';
+                        base_rate = base_rate_one_day * hours_done;
+                        $('#base_rate').val(base_rate);
+
+                        //Allowed Km
+                        var allowed_km_one_day = '<?php echo $invoiceData["response"]["BookingDetails"]["kms"]?>';
+                        allowed_kms = allowed_km_one_day * hours_done;
+                        $('#allowed_kms').val(allowed_kms);
+                        
+                    }
+
+                    if((start_km==0 && end_km)||(start_km>0&&end_km))
+                    {
+                        kms_done = parseFloat(Math.abs(end_km-start_km)).toFixed(2);
+                        $('#kms_done').val(kms_done);
+                        if(kms_done - allowed_kms > 0)
+                        {
+                            extra_kms = parseFloat(kms_done - allowed_kms).toFixed(2);
+                            $('#extra_kms').val(extra_kms);
+                        }
+                        else
+                        {
+                            extra_kms = 0;
+                            $('#extra_kms').val(0);
+                        }
+
+                        extra_kms_charge = parseFloat(km_rate*extra_kms).toFixed(2);
+                        $('#extra_kms_charge').val(extra_kms_charge);
+                    }
+
+                    if(!isNaN(parseInt(base_rate))&&!isNaN(parseInt(extra_kms_charge))&&!isNaN(parseInt(driver)))
+                    {
+                        total_ex_tax = parseFloat(parseFloat(base_rate)+parseFloat(extra_kms_charge)+parseFloat(driver));
+                        $('#total_ex_tax').val(total_ex_tax);
+                    }
+
+                    if(!isNaN(parseInt(tax_rate))&&!isNaN(parseInt(total_ex_tax)))
+                    {
+                        tax = parseFloat((parseFloat(tax_rate)*parseFloat(total_ex_tax))/100).toFixed(2);
+                        $('#tax').val(tax);
+                    }
+                    if(!isNaN(parseFloat(parking)))
+                    {
+                        total = parseFloat(parseFloat(total_ex_tax)+parseFloat(tax)+parseFloat(parking)).toFixed(2);
+                        $('#total').val(total);
+                    }
+                    
+                    if(!isNaN(parseInt(taxivaxi_tax_rate))&&!isNaN(parseInt(taxivaxi_charge)))
+                    {
+                        
+                        taxivaxi_tax_charge = parseFloat((parseFloat(taxivaxi_charge)*parseFloat(taxivaxi_tax_rate))/100).toFixed(2);
+
+                        $('#taxivaxi_tax_charge').val(taxivaxi_tax_charge);
+
+                        sub_total = parseFloat(parseFloat(total)+parseFloat(taxivaxi_charge)+parseFloat(taxivaxi_tax_charge)).toFixed(2);
+                        $('#sub_total').val(sub_total);
+                    }
+                });
+        
+    });
+    </script>

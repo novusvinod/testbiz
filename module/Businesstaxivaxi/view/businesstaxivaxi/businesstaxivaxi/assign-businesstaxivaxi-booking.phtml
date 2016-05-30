@@ -1,0 +1,81 @@
+<?php 
+    echo $this->inlineScript()->appendFile('/js/jquery.validate.min.js')->appendFile('/js/jquery-ui.js')->appendFile('/js/additional-methods.min.js');
+
+    $taxisData = json_decode($this->taxis, true);
+    $taxisCount = count($taxisData['response']['Taxis']);
+?>
+
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+<?php if(isset($_COOKIE['error'])) { ?>
+
+        <div class="box-content alerts" style="width:400px; margin:0 auto;">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong><?php echo $_COOKIE['error'] ?></strong>
+                </div>
+            </div>
+
+
+    <?php } ?>
+
+<div class="row">
+    <div class="box col-md-12">
+        <div class="box-inner">
+            <div class="box-header" data-original-title="">
+                <h4 style="font-weight:bold"></i> Assign Taxi and Driver</h4>
+            </div>
+            <div class="box-content">
+
+                    <div id="l">
+                        <form id="add-operator-form" role="form" action="/postAddAssignBooking" method="POST">
+    
+                            <div class="form-group" style="clear:left;"><br>
+                                <label for="driver_name">Driver Name</label>
+                                <input type="text" class="form-control" name="driver_name" id="driver_name" placeholder="Driver Name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="driver_contact">Driver Contact No </label><br>
+                                <input type="text" class="form-control" value="+91" disabled style="width:50px; float:left;">
+
+                                <input  style="width:95%; float:right;" class="form-control" name="driver_contact" id="driver_contact" placeholder="Contact No" required type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                            </div>
+
+                            <div class="form-group" style="clear:left;"><br>
+                                <label for="operator_name">Operator Name</label>
+                                <input type="text" class="form-control" name="operator_name" id="operator_name" placeholder="Name">
+                            </div>
+
+                            <div class="control-group" style="clear:left;"><br>
+                                <label class="control-label" for="taxi_model_id">Taxi Model</label><br>
+                                <div class="controls">
+                                    <select name="taxi_model_id" id="taxi_model_id" data-rel="chosen">
+                                        <option selected value="">Select</option>
+                                        <?php for($x=0; $x<$taxisCount; $x++){ ?>
+                                                            <option value="<?php echo $taxisData['response']['Taxis'][$x]['id'] ?>"><?php echo $taxisData['response']['Taxis'][$x]['name'] ?></option>
+                                                          <?php } ?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="clear:left;"><br>
+                                <label for="taxi_reg_no">Taxi Registartion Number</label>
+                                <input type="text" class="form-control" name="taxi_reg_no" id="taxi_reg_no" placeholder="Taxi Reg No">
+                            </div>
+
+                            <input type="hidden" name="booking_id" value="<?php echo $this->booking_id ;?>">
+
+                            <button type="submit" class="btn btn-default">ADD </button>
+
+                        </form>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+    <!--/span-->
+
+</div><!--/row-->
+
+
+    <?php echo $this->mess ;?>

@@ -1,0 +1,125 @@
+<?php 
+    echo $this->headStyle()->appendStyle('/css/RegistrationForm.css');
+    echo $this->inlineScript()->appendFile('/js/jquery.validate.min.js')->appendFile('/js/additional-methods.min.js');
+
+    // var_dump($this->booking);
+    $invoiceData = json_decode($this->invoice, true);
+?>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+
+<?php if(isset($_COOKIE['error'])) { ?>
+
+        <div class="box-content alerts" style="width:200px; margin:0 auto;">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong><?php echo $_COOKIE['error'] ?></strong>
+                </div>
+            </div>
+    <?php } ?>
+<br>
+<?php if($this->mess != "") { ?>
+
+        <div class="box-content alerts" style="width:400px; margin-left:435px;">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong><?php echo $this->mess ?></strong>
+                </div>
+            </div>
+    <?php } ?>
+
+<div class="row">
+    <div class="box col-md-12">
+        <div class="box-inner">
+            <div class="box-header" data-original-title="">
+                <h2 style="margin-left:400px; font-weight:bold" class="box-title">Edit Invoice : <?php echo $invoiceData['response']['Invoice']['reference_no']; ?></h2>
+            </div>
+            <div class="box-content">
+                <form id="add-operator-form" role="form" action="/postEditInvoiceRadio" method="POST">
+                    <input name="invoice_id" value="<?php echo $this->invoice_id; ?>" type="hidden">
+
+                    
+                    <div class="form-group">
+                                <label for="pickup_location">Total (With Extras) = Total + Extras</label>
+                                <input type="number" class="form-control" name="total" id="total" 
+                                value="<?php echo $invoiceData['response']['Invoice']['total'] ?>"
+                                style="border:1px solid green">
+                            </div> 
+                                 
+                    <div class="form-group">
+                                <label for="pickup_location">Management Fee(@10%)</label>
+                                <input type="number" class="form-control" name="taxivaxi_charge" 
+                                id="taxivaxi_charge"  
+                                value="<?php echo $invoiceData['response']['Invoice']['taxivaxi_charge'] ?>"
+                                readonly required>
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Service Tax Rate</label>
+                                <input type="number" class="form-control" name="taxivaxi_tax_rate" 
+                                id="taxivaxi_tax_rate" 
+                                value="<?php echo $invoiceData['response']['Invoice']['taxivaxi_tax_rate'] ?>"
+                                placeholder="Tax">
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Service Tax</label>
+                                <input type="number" class="form-control" name="taxivaxi_tax_charge" 
+                                value="<?php echo $invoiceData['response']['Invoice']['taxivaxi_tax_charge'] ?>"
+                                id="taxivaxi_tax_charge" placeholder="Taxivaxi Tax" readonly>
+                            </div>
+
+                    <div class="form-group">
+                                <label for="pickup_location">Sub Total = Total + Management Fee + Service Tax</label>
+                                <input type="number" class="form-control" name="sub_total" 
+                                value="<?php echo $invoiceData['response']['Invoice']['sub_total'] ?>"
+                                id="sub_total" placeholder="Sub Total" readonly
+                                style="border:1px solid green">
+                            </div>
+
+                            <!-- <input type="hidden" name="user_name" id="user_name"> -->
+                    <button type="submit" class="btn btn-warning">DONE</button>
+                    <br><br>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--/span-->
+
+</div><!--/row-->
+
+
+
+    <script>
+        $(document).ready(function() {
+            $("#taxivaxi_tax_rate,#total").change(function()
+            {
+
+                var total = parseFloat($('#total').val()).toFixed(2);
+
+                var taxivaxi_charge = parseFloat($('#taxivaxi_charge').val()).toFixed(2);
+                var taxivaxi_tax_rate = parseFloat($('#taxivaxi_tax_rate').val()).toFixed(2);
+                var taxivaxi_tax_charge = parseFloat($('#taxivaxi_tax_charge').val()).toFixed(2);
+
+                var sub_total = parseFloat($('#sub_total').val()).toFixed(2);
+                if(!isNaN(parseFloat(total)))
+                {
+                    $('#total').val(total);
+                    
+                    taxivaxi_charge = parseFloat(parseFloat(total)*0.1).toFixed(2);
+                    if(parseFloat(taxivaxi_charge) > 100)
+                        taxivaxi_charge = 100;
+                    $('#taxivaxi_charge').val(taxivaxi_charge);
+                }
+
+                if(!isNaN(parseInt(taxivaxi_tax_rate))&&!isNaN(parseInt(taxivaxi_charge)))
+                {
+                    taxivaxi_tax_charge = parseFloat((parseFloat(taxivaxi_charge)*parseFloat(taxivaxi_tax_rate))/100).toFixed(2);
+
+                    $('#taxivaxi_tax_charge').val(taxivaxi_tax_charge);
+
+                    sub_total = parseFloat(parseFloat(total)+parseFloat(taxivaxi_charge)+parseFloat(taxivaxi_tax_charge)).toFixed(2);
+                    $('#sub_total').val(sub_total);
+                }
+            });
+        });
+    </script>

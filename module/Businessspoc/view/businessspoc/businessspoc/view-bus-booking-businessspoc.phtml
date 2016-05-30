@@ -1,0 +1,293 @@
+<?php 
+    echo $this->headStyle()->appendStyle('/css/RegistrationForm.css');
+    echo $this->inlineScript()->appendFile('/js/jquery.validate.min.js')->appendFile('/js/additional-methods.min.js');
+
+
+    $companiesData = json_decode($this->booking, true);
+?>
+
+<div class="row">
+    <div class="box col-md-12">
+        <div class="box-inner">
+            <div class="box-header" data-original-title="">
+                <h2 class="box-title">Booking Details: <?php echo $companiesData['response']['BookingDetail']['reference_no']; ?>
+                </h2>
+            </div>
+            <div class="box-content">
+                <table class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+                    <tr>
+                        <th style="width:350px">Booking Reference No</th>
+                        <td><?php echo $companiesData['response']['BookingDetail']['reference_no']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Tour Type</th>
+                        <td>Bus</td>
+                    </tr>
+                    <tr>
+                        <th>From: City</th>
+                        <td><?php echo $companiesData['response']['BookingDetail']['pickup_city']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>To: City</th>
+                        <td><?php echo $companiesData['response']['BookingDetail']['drop_city']; ?></td>
+                    </tr>
+                     <tr>
+                        <th>Booking Date</th>
+                        <td><?php echo date("d M Y - h:i a", strtotime($companiesData['response']['BookingDetail']['created'])); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Pickup Datetime Range Requested</th>
+                        <td><?php echo date("d M Y - h:i a", strtotime(explode("::", $companiesData['response']['BookingDetail']['time_range'])[0])); ?> To <?php echo date("d M Y - h:i a", strtotime(explode("::", $companiesData['response']['BookingDetail']['time_range'])[1])); ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Status</th>
+                        <td><?php if($companiesData['response']['BookingDetail']['status_auth_taxivaxi'] == '0'){ ?>Pending
+                            <?php }elseif ($companiesData['response']['BookingDetail']['status_auth_taxivaxi'] == '1') { ?>Accepted
+                            <?php }elseif ($companiesData['response']['BookingDetail']['status_auth_taxivaxi'] == '2') { ?>Rejected
+                            <?php }else{?>Assigned
+                            <?php }?>
+                        </td>
+                    </tr>
+                    <?php if($_COOKIE['has_assessment_codes_business_spoc'] == '1') { ?>
+                    <tr>
+                        <th>Assessment Code</th>
+                        <td><?php echo $companiesData['response']['BookingDetail']['assessment_code']; ?></td>
+                    </tr>
+                    <?php } ?>
+                    <tr>
+                        <th>Reason for Booking</th>
+                        <td><?php echo $companiesData['response']['BookingDetail']['reason_of_booking']; ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+<!--/span-->
+</div><!--/row-->
+
+    <div class="row">
+        <div class="box col-md-12">
+            <div class="box-inner">
+                <div class="box-header" data-original-title="">
+                    <h2 class="box-title">Package Details</h2>
+                </div>
+                <div class="box-content">
+                    <table class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+                        <tr>
+                            <th style="width:350px">Package Name</th>
+                            <td>Bus</td>
+                        </tr>
+
+                        <tr>
+                            <th>Bus Type Requested</th>
+                            <td><?php echo $companiesData['response']['BookingDetail']['bus_type_priority_1']; ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Bus Type Assigned</th>
+                            <td><?php echo $companiesData['response']['BookingDetail']['bus_type_allocated'] ; ?></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <!--/span-->
+</div>
+
+
+    <div class="row">
+    <div class="box col-md-12">
+    <div class="box-inner">
+    <div class="box-header" data-original-title="">
+        <h2 class="box-title">Spoc Details</h2>
+    </div>
+    <div class="box-content">
+    <table class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+ 
+    <tr>
+        <th style="width:350px">Spoc Name</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['user_name'] ?></td>
+    </tr>
+    <tr>
+        <th>Spoc Contact Email</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['user_email'] ?></td>
+    </tr>
+
+    <tr>
+        <th>Spoc Contact No</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['user_contact'] ?></td>
+    </tr>
+   
+    </table>
+    </div>
+    </div>
+    </div>
+    <!--/span-->
+
+    </div><!--/row-->
+
+
+    <div class="row">
+    <div class="box col-md-12">
+    <div class="box-inner">
+    <div class="box-header" data-original-title="">
+        <h2 class="box-title">Passenger Details</h2>
+    </div>
+    <div class="box-content">
+    <table class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+    
+    <?php for($i=1; $i<=(int)$companiesData['response']['BookingDetail']['no_of_seats']; $i++){ ?>
+    <tr>
+        <th style="width:350px">Passenger <?php echo $i; ?> Employee Id</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['People'][$i-1]['people_cid'] ?></td>
+    </tr>
+    <tr>
+        <th style="width:350px">Passenger <?php echo $i; ?> Name</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['People'][$i-1]['people_name'] ?></td>
+    </tr>
+    <tr>
+        <th>Passenger <?php echo $i; ?> Contact Email</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['People'][$i-1]['people_email'] ?></td>
+    </tr>
+    <tr>
+        <th>Passenger <?php echo $i; ?> Contact No</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['People'][$i-1]['people_contact'] ?></td>
+    </tr>
+    <tr>
+        <th></th>
+        <th></th>
+    </tr>
+    <?php } ?>
+   
+    </table>
+    </div>
+    </div>
+    </div>
+    <!--/span-->
+
+    </div><!--/row-->
+
+
+
+    <div class="row">
+    <div class="box col-md-12">
+    <div class="box-inner">
+    <div class="box-header" data-original-title="">
+        <h2 class="box-title"> Bus Details</h2>
+    </div>
+    <div class="box-content">
+    <table class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+    
+    <tr>
+        <th style="width:350px">Ticket Number</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['ticket_number'] ; ?></td>
+    </tr>
+
+    <tr>
+        <th>PNR Number</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['pnr_number'] ; ?></td>
+    </tr>
+
+    <tr>
+        <th>Bus Type</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['bus_type_allocated'] ; ?></td>
+    </tr>
+
+    <tr>
+        <th>Operator Name</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['operator_name'] ; ?></td>
+    </tr>
+    
+    <tr>
+        <th>Operator Contact</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['operator_name'] ; ?></td>
+    </tr>
+
+    <tr>
+        <th>Seat Number</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['seat_number'] ; ?></td>
+    </tr>
+   
+    </table>
+    </div>
+    </div>
+    </div>
+    <!--/span-->
+
+    </div><!--/row-->
+
+
+        <div class="row">
+    <div class="box col-md-12">
+    <div class="box-inner">
+    <div class="box-header" data-original-title="">
+        <h2 class="box-title"> Boarding Details</h2>
+    </div>
+    <div class="box-content">
+    <table class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+    
+    <tr>
+        <th style="width:350px">Boarding Point</th>
+        <td><?php echo $companiesData['response']['BookingDetail']['boarding_point_taxivaxi'] ; ?></td>
+    </tr>
+
+    <tr>
+        <th>Boarding Time</th>
+        <td><?php echo date("d M Y - h:i a", strtotime($companiesData['response']['BookingDetail']['pickup_datetime_taxivaxi'])) ; ?></td>
+    </tr>
+
+   
+    </table>
+    </div>
+    </div>
+    </div>
+    <!--/span-->
+
+    </div><!--/row-->
+
+
+
+        <div class="row">
+    <div class="box col-md-12">
+    <div class="box-inner">
+    <div class="box-header" data-original-title="">
+        <h2 class="box-title"> Billing Details</h2>
+    </div>
+    <div class="box-content">
+    <table class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+    
+    
+    <tr>
+        <th style="width:350px">Total Amount</th>
+        <td></td>
+    </tr>
+   
+    </table>
+    </div>
+    </div>
+    </div>
+    <!--/span-->
+
+    </div><!--/row-->
+
+    <?php echo $this->mess ;?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

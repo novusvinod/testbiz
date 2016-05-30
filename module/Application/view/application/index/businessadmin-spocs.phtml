@@ -1,0 +1,955 @@
+<?php if(isset($_COOKIE['success'])) { ?>
+    <div class="alert alert-success alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <?php echo $_COOKIE['success'] ?>
+    </div>
+<?php } ?>
+
+<?php if(isset($_COOKIE['error'])) { ?>
+    <div class="alert alert-danger alert-dismissable">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <?php echo $_COOKIE['error'] ?>
+    </div>
+<?php } ?>
+
+<?php
+    $spocsData = json_decode($this->employees, true);
+    if(isset($spocsData['response'])){
+        $spocsCount = count($spocsData['response']['Employees']);
+    }
+    else{
+        $spocsCount = 0;
+        // $max_budget = floatval($spocsData['admin_budget']);
+    }
+
+    $subgroupsData = json_decode($this->subgroups, true);
+    $subgroupsCount;
+    if(isset($subgroupsData['response'])){
+        $subgroupsCount = count($subgroupsData['response']['Subgroups']);
+    }
+    else{
+        $subgroupsCount = 0;
+    }
+
+    $acquirespocData = json_decode($this->acquirespoc, true);
+    $acquirespocCount;
+    if(isset($acquirespocData['response'])){
+        $acquirespocCount = count($acquirespocData['response']['Dspocs']);
+    }
+    else{
+        $acquirespocCount = 0;
+    }
+
+    // var_dump($this->acquirespoc);
+
+?>
+
+<?php echo $this->mess ;?>
+
+<div id="my_table">
+    <!-- <div style="float:left; width:300px; margin-left:500px;">
+        <a href="/download/spocs"><button class="btn btn-success btn-block">Download All data as Excel Sheet</button></a>
+    </div> -->
+    <div style="text-align:center; font-weight:bold; font-size:18px;">Spocs</div>    
+    <div style="float:right; width:200px; margin-right:10px;">
+        <button class="btn btn-info btn-block" id="add_group_button">ADD New Spoc</button>
+    </div>
+
+    <div class="row" style="padding-top:50px">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"></h3>
+                </div><!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-striped table-bordered datatable" id="table_booking">
+                        <thead>
+                            <tr style="width:100%; font-size:15px">
+                                <th style="width:15%" class="text-left">SPOC NAME</th>
+                                <th style="width:20%" class="text-left">SPOC EMAIL</th>
+                                <?php if($_COOKIE['has_auth_level']) {?>
+                                <th style="width:15%" class="text-left">SUBGROUP NAME</th>
+                                <th style="width:13%" class="text-left">GROUP NAME</th>
+                                <?php } ?>
+                                <!-- <th style="width:13%; text-align:center">BUDGET (Rs)</th>
+                                <th style="width:15%; text-align:center">EXPENSES (Rs)</th> -->
+                                <th style="width:9%;">STATUS</th>
+                                <!-- <th style="width:5%; text-align:center"></th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php for($i=0; $i<$spocsCount; $i++){ ?>
+                            <tr style="font-size:13px; cursor:pointer" class="my_row" id="<?php echo $spocsData['response']['Employees'][$i]['id'] ?>">
+                                <td><?php echo $spocsData['response']['Employees'][$i]['user_name'] ?></td>
+                                <td><?php echo $spocsData['response']['Employees'][$i]['email'] ?></td>
+                                <?php if($_COOKIE['has_auth_level']) {?>
+                                    <td><?php echo $spocsData['response']['Employees'][$i]['subgroup_name'] ?></td>
+                                    <td><?php echo $spocsData['response']['Employees'][$i]['group_name'] ?></td>
+                                <?php } ?>
+                                <!-- <td style="text-align:center"><?php echo $spocsData['response']['Employees'][$i]['budget'] ?></td>
+                                <td style="text-align:center"><?php echo $spocsData['response']['Employees'][$i]['expense'] ?></td> -->
+                                <td style="text-align:left">
+                                    <?php if ($spocsData['response']['Employees'][$i]['status'] == '1'){ ?>
+                                        <p style="color:green"><i class="fa fa-circle green" style="margin-right:5px"></i>Active</p>
+                                    <?php }else{ ?>
+                                        <p style="color:red"><i class="fa fa-circle red" style="margin-right:5px"></i>Deactive</p>
+                                    <?php } ?>
+
+                                </td>
+                                <!-- <td class="center" >
+                                    <?php $l = $spocsData['response']['Employees'][$i]['id']; ?>
+                                    <a id="delete_group_button" style="display:none" class=" fa-trash" onclick="Confirm.render('Delete this Spoc?', ' \/spoc\/delete\/<?php echo $l ?> ');">
+                                        <i class="glyphicon glyphicon-trash icon-white"></i>
+                                    </a>
+                                </td> -->
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+    </div>
+</div>
+
+<div id="add_group_form" class="box box-primary" style="width:900px; margin-left:200px">
+    <div class="box-header">
+        <h3 class="box-title">ADD New Spoc</h3>
+    </div><!-- /.box-header -->
+    <!-- form start -->
+    <form action="/postAddSpoc" method="POST" role="form" id="add_spoc_form">
+        <div class="box-body">
+
+            <div class="form-group">
+                <label for="group_name">Spoc Employee Id</label>
+                <input type="text" class="form-control" name="user_cid" id="user_cid" placeholder="Spoc Id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="group_name">Spoc Name</label>
+                <input type="text" class="form-control" name="user_name" id="user_name" placeholder="Spoc Name" required>
+            </div>
+
+            <div class="form-group">
+                                <label for="driver_contact">Spoc Contact No </label><br>
+                                <input type="text" class="form-control" value="+91" disabled style="width:7%; float:left;">
+
+                                <input  style="width:90%; float:right;" class="form-control" name="user_contact" id="user_contact" placeholder="Contact No" required type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                            </div><br><br>
+
+            <div class="form-group" style="clear:left;">
+                <label for="group_name">Spoc Email</label>
+                <input type="email" class="form-control email_check" name="email" id="email" placeholder="Spoc Email" required>
+            </div>
+
+            <?php if($_COOKIE['has_auth_level'] == '1') {?>
+            <div class="control-group">
+                <label class="control-label" for="selectError">Sub-Group</label>
+                    <div class="controls">
+                        <select name="subgroup_id" id="subgroup_id" data-rel="chosen" required>
+                            <option selected value="">Select</option>
+                            <?php for($x=0; $x<$subgroupsCount; $x++){ ?>
+                            <option value="<?php echo $subgroupsData['response']['Subgroups'][$x]['subgroup_id'] ?>"><?php echo $subgroupsData['response']['Subgroups'][$x]['subgroup_name'] ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </label>
+            </div><br>
+
+            <div class="control-group">
+                <label class="control-label" for="edit_group_id">Acquire Spoc</label>
+                    <div class="controls">
+                        <select name="acquired_spoc_id" id="acquired_spoc_id" data-rel="chosen">
+                            <option selected value="">Select</option>
+                            <?php for($x=0; $x<$acquirespocCount; $x++){ ?>
+                            <option value="<?php echo $acquirespocData['response']['Dspocs'][$x]['id'] ?>"><?php echo $acquirespocData['response']['Dspocs'][$x]['user_name'] ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </label>
+            </div><br>
+            <?php }else{?>
+                <input type="hidden" name="subgroup_id" value="temp">
+                <input type="hidden" name="acquired_spoc_id" value="temp">
+            <?php }?>
+
+            <div class="control-group">
+                <label class="control-label" for="selectError">Status</label>
+                    <div class="controls">
+                        <select name="status" id="status" data-rel="chosen">
+                            <option value="1">Activate</option>
+                            <option value="0">Deactivate</option>
+                        </select>
+                    </div>
+                </label>
+            </div>
+
+            <?php if($_COOKIE['has_auth_level'] == '1') {?>
+            <br><label for="budget">Tour Type</label><br>
+            <div class="form-group">
+                <label id="is_radio_div">
+                    <div class="icheckbox_minimal-red" aria-checked="false" aria-disabled="false" style="position: relative;">
+                        <input type="checkbox" class="minimal-red" style="position: absolute; opacity: 0;" name="is_radio" id="is_radio" value="Yes">
+                        <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; border: 0px; opacity: 0; background: rgb(255, 255, 255);">
+                        </ins>
+                    </div>
+                    Radio
+                </label>
+                <label id="is_local_div" style="margin-left:45px">
+                    <div class="icheckbox_minimal-red" aria-checked="false" aria-disabled="false" style="position: relative;">
+                        <input type="checkbox" class="minimal-red" style="position: absolute; opacity: 0;" name="is_local" id="is_local" value="Yes">
+                        <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; border: 0px; opacity: 0; background: rgb(255, 255, 255);">
+                        </ins>
+                    </div>
+                    Local Package
+                </label>
+                <label id="is_outstation_div" style="margin-left:20px">
+                    <div class="icheckbox_minimal-red" aria-checked="false" aria-disabled="false" style="position: relative;">
+                        <input type="checkbox" class="minimal-red" style="position: absolute; opacity: 0;" name="is_outstation" id="is_outstation" value="Yes">
+                        <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; border: 0px; opacity: 0; background: rgb(255, 255, 255);">
+                        </ins>
+                    </div>
+                    Outstation
+                </label>
+                <label id="is_bus_div" style="margin-left:20px">
+                    <div class="icheckbox_minimal-red" aria-checked="false" aria-disabled="false" style="position: relative;">
+                        <input type="checkbox" class="minimal-red" style="position: absolute; opacity: 0;" name="is_bus" id="is_bus" value="Yes">
+                        <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; border: 0px; opacity: 0; background: rgb(255, 255, 255);">
+                        </ins>
+                    </div>
+                    Bus
+                </label>
+            </div>
+            <?php }else{?>
+                <?php if($_COOKIE['is_radio'] == '1') {?>
+                    <input type="hidden" name="is_radio" value="Yes">
+                <?php }else{ ?>
+                    <input type="hidden" name="is_radio" value="No">
+                <?php } ?>
+
+                <?php if($_COOKIE['is_local'] == '1') {?>
+                    <input type="hidden" name="is_local" value="Yes">
+                <?php }else{ ?>
+                    <input type="hidden" name="is_local" value="No">
+                <?php } ?>
+
+                <?php if($_COOKIE['is_outstation'] == '1') {?>
+                    <input type="hidden" name="is_outstation" value="Yes">
+                <?php }else{ ?>
+                    <input type="hidden" name="is_outstation" value="No">
+                <?php } ?>
+
+                <?php if($_COOKIE['is_bus'] == '1') {?>
+                    <input type="hidden" name="is_bus" value="Yes">
+                <?php }else{ ?>
+                    <input type="hidden" name="is_bus" value="No">
+                <?php } ?>
+            <?php } ?>
+
+            <!-- <label for="budget">Budget</label><br>
+            <div class="input-group">
+                <span class="input-group-addon">Rs.</span>
+                <input type="number" class="form-control" name="budget" id="budget" placeholder="Budget For Spoc">
+            </div>
+            <p id="p_max_budget"> </p> -->
+
+        </div><!-- /.box-body -->
+
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="btn btn-primary" style="color:yellow; background-color:black" id="cancel_group_button">Cancel</div>
+        </div>
+    </form>
+</div>
+
+<div id="edit_group_form" class="box box-primary" style="width:900px; margin-left:200px">
+    <div class="box-header">
+        <h3 class="box-title">Edit Spoc</h3>
+    </div><!-- /.box-header -->
+    <!-- form start -->
+    <form action="/postEditSpoc" method="POST" role="form">
+        <input type="hidden" name="edit_spoc_id" id="edit_spoc_id">
+        <div class="box-body">
+
+            <div class="form-group">
+                <label for="group_name">Spoc Id</label>
+                <input type="text" class="form-control" name="edit_user_cid" id="edit_user_cid" placeholder="Spoc Id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="group_name">Spoc Name</label>
+                <input type="text" class="form-control" name="edit_user_name" id="edit_user_name" placeholder="Spoc Name" required>
+            </div>
+
+            <div class="form-group">
+                                <label for="driver_contact">Spoc Contact No </label><br>
+                                <input type="text" class="form-control" value="+91" disabled style="width:7%; float:left;">
+
+                                <input  style="width:90%; float:right;" class="form-control" name="edit_user_contact" id="edit_user_contact" placeholder="Contact No" required type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10">
+                            </div><br><br>
+
+            <div class="form-group" style="clear:left;">
+                <label for="group_name">Spoc Email</label>
+                <input type="email" class="form-control" name="edit_email" id="edit_email" placeholder="Spoc Email" required>
+            </div>
+
+            <?php if($_COOKIE['has_auth_level'] == '1') {?>
+            <div class="control-group">
+                <label class="control-label" for="edit_group_id">Sub-Group</label>
+                    <div class="controls">
+                        <select name="edit_subgroup_id" id="edit_subgroup_id" data-rel="chosen">
+                            <option selected value="">Select</option>
+                            <?php for($x=0; $x<$subgroupsCount; $x++){ ?>
+                            <option value="<?php echo $subgroupsData['response']['Subgroups'][$x]['subgroup_id'] ?>"><?php echo $subgroupsData['response']['Subgroups'][$x]['subgroup_name'] ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </label>
+            </div><br>
+            <?php }else{?>
+                <input type="hidden" name="edit_subgroup_id" value="temp">
+            <?php }?>
+
+            <!-- <label for="budget">Budget</label><br>
+            <div class="input-group">
+                <span class="input-group-addon">Rs.</span>
+                <input type="number" class="form-control" name="edit_budget" id="edit_budget" placeholder="Budget For Sub-group">
+            </div>
+            <p id="p_max_budget_edit"> </p> -->
+
+            <div class="control-group">
+                <label class="control-label" for="selectError">Status</label>
+                    <div class="controls">
+                        <select name="edit_status" id="edit_status" data-rel="chosen">
+                            <option value="1">Activate</option>
+                            <option value="0">Deactivate</option>
+                        </select>
+                    </div>
+                </label>
+            </div>
+
+            <?php if($_COOKIE['has_auth_level'] == '1') {?>
+            <br><label for="budget">Tour Type</label><br>
+            <div class="form-group">
+                <label id="is_radio_div_edit">
+                    <div class="icheckbox_minimal-red" aria-checked="false" aria-disabled="false" style="position: relative;" id="r">
+                        <input type="checkbox" class="minimal-red" style="position: absolute; opacity: 0;" name="edit_is_radio" id="edit_is_radio" value="Yes">
+                        <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; border: 0px; opacity: 0; background: rgb(255, 255, 255);">
+                        </ins>
+                        <input type="hidden" name="edit_radio_extra" id="edit_radio_extra" value=''>
+                    </div>
+                    Radio
+                </label>
+                <label id="is_local_div_edit" style="margin-left:20px">
+                    <div class="icheckbox_minimal-red" aria-checked="false" aria-disabled="false" style="position: relative;" id="l">
+                        <input type="checkbox" class="minimal-red" style="position: absolute; opacity: 0;" name="edit_is_local" id="edit_is_local" value="Yes" >
+                        <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; border: 0px; opacity: 0; background: rgb(255, 255, 255);">
+                        </ins>
+                        <input type="hidden" name="edit_local_extra" id="edit_local_extra" value=''>
+                    </div>
+                    Local
+                </label>
+                <label id="is_outstation_div_edit" style="margin-left:20px">
+                    <div class="icheckbox_minimal-red" aria-checked="false" aria-disabled="false" style="position: relative;" id="o">
+                        <input type="checkbox" class="minimal-red" style="position: absolute; opacity: 0;" name="edit_is_outstation" id="edit_is_outstation" value="Yes" >
+                        <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; border: 0px; opacity: 0; background: rgb(255, 255, 255);">
+                        </ins>
+                        <input type="hidden" name="edit_outstation_extra" id="edit_outstation_extra" value=''>
+                    </div>
+                    Outstation
+                </label>
+                <label id="is_bus_div_edit" style="margin-left:20px">
+                    <div class="icheckbox_minimal-red" aria-checked="false" aria-disabled="false" style="position: relative;" id="b">
+                        <input type="checkbox" class="minimal-red" style="position: absolute; opacity: 0;" name="edit_is_bus" id="edit_is_bus" value="Yes" >
+                        <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; border: 0px; opacity: 0; background: rgb(255, 255, 255);">
+                        </ins>
+                        <input type="hidden" name="edit_bus_extra" id="edit_bus_extra" value=''>
+                    </div>
+                    Bus
+                </label>
+            </div>
+            <?php }else{?>
+                <?php if($_COOKIE['is_radio'] == '1') {?>
+                    <input type="hidden" name="edit_is_radio" value="Yes">
+                <?php }else{ ?>
+                    <input type="hidden" name="edit_is_radio" value="No">
+                <?php } ?>
+
+                <?php if($_COOKIE['is_local'] == '1') {?>
+                    <input type="hidden" name="edit_is_local" value="Yes">
+                <?php }else{ ?>
+                    <input type="hidden" name="edit_is_local" value="No">
+                <?php } ?>
+
+                <?php if($_COOKIE['is_outstation'] == '1') {?>
+                    <input type="hidden" name="edit_is_outstation" value="Yes">
+                <?php }else{ ?>
+                    <input type="hidden" name="edit_is_outstation" value="No">
+                <?php } ?>
+
+                <?php if($_COOKIE['is_bus'] == '1') {?>
+                    <input type="hidden" name="edit_is_bus" value="Yes">
+                <?php }else{ ?>
+                    <input type="hidden" name="edit_is_bus" value="No">
+                <?php } ?>
+            <?php } ?>
+
+        </div><!-- /.box-body -->
+
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="btn btn-primary" style="color:yellow; background-color:black" id="cancel_group_button2">Cancel</div>
+        </div>
+    </form>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    var has_auth_level = '<?php echo $_COOKIE["has_auth_level"] ?>';
+
+    if(has_auth_level=='1')
+    {
+        $('#table_booking').DataTable({
+            'paging': true,
+            'aaSorting' : [],
+            "columns": [
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"}
+                ]
+        });
+    }
+    else
+    {
+        $('#table_booking').DataTable({
+            'paging': true,
+            'aaSorting' : [],
+            "columns": [
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"},
+                    {"orderDataType": "dom-text-numeric"}
+                ]
+        });   
+    }
+
+    var global_spoc_id;
+    var global_spoc_subgroup_id;
+    var global_spoc_subgroup_unallocated;
+    var global_spoc_budget;
+    var global_spoc_is_radio;
+    var global_spoc_is_local;
+    var global_spoc_is_outstation;
+    var global_spoc_is_bus;
+
+    $('#add_group_form').hide();
+    $('#edit_group_form').hide();
+
+    $('a').click(function(){
+        $('#my_table').show();
+        $('#add_group_form').hide();
+        $('#edit_group_form').hide();
+    });
+
+    $('#add_group_button').click(function(){
+        var sgc = parseInt('<?php echo $subgroupsCount; ?>');
+        if((sgc > 0 && has_auth_level == '1') || has_auth_level=='0'){
+            $('#my_table').hide();
+            $('#edit_group_form').hide();
+            $('#is_radio_div').hide();
+            $('#is_local_div').hide();
+            $('#is_outstation_div').hide();
+            $('#is_bus_div').hide();
+
+            $('#user_cid').val('');
+            $('#user_name').val('');
+            $('#email').val('');
+            $('#budget').val('');
+            $('#is_radio').attr('checked', false);
+            $('#is_local').attr('checked', false);
+            $('#is_outstation').attr('checked', false);
+            $('#is_bus').attr('checked', false);
+
+            $('#is_radio').closest('div').attr('aria-checked', false).removeClass('checked');
+            $('#edit_radio_extra').val('');
+            $('#is_local').closest('div').attr('aria-checked', false).removeClass('checked');
+            $('#edit_local_extra').val('');
+            $('#outstation').closest('div').attr('aria-checked', false).removeClass('checked');
+            $('#outstation_extra').val('');
+            $('#bus').closest('div').attr('aria-checked', false).removeClass('checked');
+            $('#bus_extra').val('');
+            $('#add_group_form').show();
+        }
+        else
+        {
+            alert('Please add Groups and Sub-groups first in order to add spocs');
+        }
+    });
+
+    $('#cancel_group_button, #cancel_group_button2').click(function(){
+        $('#my_table').show();
+        $('#add_group_form').hide();
+        $('#edit_group_form').hide();
+    });
+
+    //***********
+    $('#r').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_radio_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_radio_extra').val('Yes');
+        }
+    });
+
+    //**********
+    $('#l').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_local_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_local_extra').val('Yes');
+        }
+    });
+
+    //**********
+    $('#o').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_outstation_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_outstation_extra').val('Yes');
+        }
+    });
+
+    //**********
+    $('#b').click(function () {
+        if($(this).hasClass('checked'))
+        {
+            $(this).removeClass('checked');
+            $('#edit_bus_extra').val('');
+        }
+        else
+        {
+            $(this).addClass('checked');
+            $('#edit_bus_extra').val('Yes');
+        }
+    });
+
+    //*********
+    //edit
+    $('#table_booking').on("click", ".my_row", function(){
+        $('#is_radio_div_edit').hide();
+        $('#is_local_div_edit').hide();
+        $('#is_outstation_div_edit').hide();
+        $('#is_bus_div_edit').hide();
+
+        var fun = (function(at, ei){
+            jQuery.ajax({
+                        url: 'http://taxivaxi.in/business/api/viewSpoc',
+                        type: 'post',
+                        data: {
+                            access_token: at,
+                            spoc_id: ei
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            if(data.success == '0')
+                            {
+                                alert('No such spoc found. Please select another');
+                            }
+                            else
+                            {
+                                $('#edit_spoc_id').val('');
+                                $('#edit_user_cid').val('');
+                                $('#edit_user_name').val('');
+                                $('#edit_budget').val('');
+                                
+                                $('#edit_is_radio').closest('div').attr('aria-checked', false).removeClass('checked');
+                                $('#edit_radio_extra').val('');
+                                $('#edit_is_local').closest('div').attr('aria-checked', false).removeClass('checked');
+                                $('#edit_local_extra').val('');
+                                $('#edit_is_outstation').closest('div').attr('aria-checked', false).removeClass('checked');
+                                $('#edit_outstation_extra').val('');
+                                $('#edit_is_bus').closest('div').attr('aria-checked', false).removeClass('checked');
+                                $('#edit_bus_extra').val('');
+                
+                                var Spoc = data.response.Employee;
+
+                                global_spoc_subgroup_id = Spoc.subgroup_id;
+                                global_spoc_subgroup_unallocated = Spoc.subgroup_unallocated;
+                                global_spoc_budget = Spoc.budget;
+                                global_spoc_is_radio = Spoc.is_radio;
+                                global_spoc_is_local = Spoc.is_local;
+                                global_spoc_is_outstation = Spoc.is_outstation;
+                                global_spoc_is_bus = Spoc.is_bus;
+                                
+                                $('#edit_spoc_id').val(Spoc.id);
+                                $('#edit_user_cid').val(Spoc.user_cid);
+                                $('#edit_user_name').val(Spoc.user_name);
+                                $('#edit_user_contact').val(Spoc.user_contact);
+                                $('#edit_email').val(Spoc.email);
+                                $('#edit_budget').val(Spoc.budget);
+
+                                $("#edit_subgroup_id option").each(function()
+                                {
+                                    // Add $(this).val() to your list
+                                    if($(this).val() == Spoc.subgroup_id)
+                                    {
+                                        $(this).attr('selected', true);
+                                    }
+                                });
+
+                                $("#edit_status option").each(function()
+                                {
+                                    // Add $(this).val() to your list
+                                    if($(this).val() == Spoc.status)
+                                    {
+                                        $(this).attr('selected', true);
+                                    }
+                                });
+
+                                if(Spoc.subgroup_is_radio == '1')
+                                {
+                                    if(Spoc.is_radio == '0')
+                                    {
+                                        $('#edit_is_radio').closest('div').attr('aria-checked', false).removeClass('checked');
+                                        $('#edit_radio_extra').val('');
+                                    }
+                                    else
+                                    {
+                                        $('#edit_is_radio').closest('div').attr('aria-checked', true).addClass('checked');
+                                        $('#edit_radio_extra').val('Yes');
+                                    }
+                                    $('#is_radio_div_edit').show();
+                                }
+
+                                if(Spoc.subgroup_is_local == '1')
+                                {
+                                    if(Spoc.is_local == '0')
+                                    {
+                                        $('#edit_is_local').closest('div').attr('aria-checked', false).removeClass('checked');
+                                        $('#edit_local_extra').val('');
+                                    }
+                                    else
+                                    {
+                                        $('#edit_is_local').closest('div').attr('aria-checked', true).addClass('checked');
+                                        $('#edit_local_extra').val('Yes');
+                                    }
+                                    $('#is_local_div_edit').show();
+                                }
+                                
+                                if(Spoc.subgroup_is_outstation == '1')
+                                {
+                                    if(Spoc.is_outstation == '0')
+                                    {
+                                        $('#edit_is_outstation').closest('div').attr('aria-checked', false).removeClass('checked');
+                                        $('#edit_outstation_extra').val('');
+                                    }
+                                    else
+                                    {
+                                        $('#edit_is_outstation').closest('div').attr('aria-checked', true).addClass('checked');
+                                        $('#edit_outstation_extra').val('Yes');
+                                    }
+                                    $('#is_outstation_div_edit').show();
+                                }
+
+                                if(Spoc.subgroup_is_bus == '1')
+                                {
+                                    if(Spoc.is_bus == '0')
+                                    {
+                                        $('#edit_is_bus').closest('div').attr('aria-checked', false).removeClass('checked');
+                                        $('#edit_bus_extra').val('');
+                                    }
+                                    else
+                                    {
+                                        $('#edit_is_bus').closest('div').attr('aria-checked', true).addClass('checked');
+                                        $('#edit_bus_extra').val('Yes');
+                                    }
+                                    $('#is_bus_div_edit').show();
+                                }
+
+                                $('#p_max_budget_edit').text("(Max Rs." + parseFloat(parseFloat(global_spoc_budget) + parseFloat(global_spoc_subgroup_unallocated)) + ")");
+                                $('#edit_budget').attr({
+                                    "max" :  parseFloat(parseFloat(global_spoc_budget) + parseFloat(global_spoc_subgroup_unallocated)),
+                                    "min" : 0
+                                });
+                            }
+                        },
+                        error: function(data)
+                        {
+                        }
+                    });
+        });
+
+        var ei = parseInt($(this).attr('id'));
+        global_spoc_id = ei;
+        var at = '<?php echo $_COOKIE["access_token_business_admin"]?>' ;
+
+        fun(at, ei);
+        $('#my_table').hide();
+        $('#add_group_form').hide();
+        $('#edit_group_form').show(); 
+    });
+    
+    //For Delete Button
+    $('.my_row').mouseover(function(){
+        $(this).find('a').show();
+    });
+
+    $('.my_row').mouseout(function(){
+        $(this).find('a').hide();
+    });
+
+    //For Add form
+    $("#subgroup_id").change(function(){
+        $('#is_radio').closest('div').attr('aria-checked', false).removeClass('checked');
+        $('#edit_radio_extra').val('');
+        $('#is_local').closest('div').attr('aria-checked', false).removeClass('checked');
+        $('#edit_local_extra').val('');
+        $('#is_outstation').closest('div').attr('aria-checked', false).removeClass('checked');
+        $('#edit_outstation_extra').val('');
+        $('#is_bus').closest('div').attr('aria-checked', false).removeClass('checked');
+        $('#edit_bus_extra').val('');
+        
+        $('#is_radio_div').hide();
+        $('#is_local_div').hide();
+        $('#is_outstation_div').hide();
+        $('#is_bus_div').hide();
+
+        var sgi = $(this).val();
+        var at = '<?php echo $_COOKIE["access_token_business_admin"] ?>';
+        jQuery.ajax({
+            url: 'http://taxivaxi.in/business/api/viewSubgroup',
+            type: 'post',
+            data: {
+                access_token: at,
+                subgroup_id: sgi
+            },
+            dataType: 'json',
+            success: function (data) {
+                if(data.success == '0')
+                    alert('No such sub-group found. Please select another');
+                else
+                {
+                    var Subgroup = data.response.Subgroup;
+                    $('#p_max_budget').text("(Max Rs." + parseFloat(Subgroup.unallocated) + ")");
+                    $('#budget').attr({
+                        "max" : parseInt(Subgroup.unallocated),
+                        "min" : 0
+                    });
+
+                    if(Subgroup.is_radio == '1')
+                    {
+                        $('#is_radio_div').show();
+                    }
+
+                    if(Subgroup.is_local == '1')
+                    {
+                        $('#is_local_div').show();
+                    }
+
+                    if(Subgroup.is_outstation == '1')
+                    {
+                        $('#is_outstation_div').show();
+                    }
+
+                    if(Subgroup.is_bus == '1')
+                    {
+                        $('#is_bus_div').show();
+                    }
+
+                }
+            },
+            error: function(data)
+            {
+            }
+        });
+    });
+    
+    //edit subgroup change
+    $('#edit_subgroup_id').change(function(){
+        $('#edit_is_radio').closest('div').attr('aria-checked', false).removeClass('checked');
+        $('#edit_radio_extra').val('');
+        $('#edit_is_local').closest('div').attr('aria-checked', false).removeClass('checked');
+        $('#edit_local_extra').val('');
+        $('#edit_is_outstation').closest('div').attr('aria-checked', false).removeClass('checked');
+        $('#edit_outstation_extra').val('');
+        $('#edit_is_bus').closest('div').attr('aria-checked', false).removeClass('checked');
+        $('#edit_bus_extra').val('');
+
+        $('#is_radio_div_edit').hide();
+        $('#is_local_div_edit').hide();
+        $('#is_outstation_div_edit').hide();
+        $('#is_bus_div_edit').hide();
+
+        var sgi = $('#edit_subgroup_id').val();
+        // alert(global_subgroup_id + "-" + global_subgroup_group_id + "-" + global_subgroup_group_unallocated);
+        var at = '<?php echo $_COOKIE["access_token_business_admin"] ?>';
+        jQuery.ajax({
+            url: 'http://taxivaxi.in/business/api/viewSubgroup',
+            type: 'post',
+            data: {
+                access_token: at,
+                subgroup_id: sgi
+            },
+            dataType: 'json',
+            success: function (data) {
+                if(data.success == '0')
+                    alert('No such subgroup found. Please select another');
+                else
+                {
+                    var Subgroup = data.response.Subgroup;
+
+                    if(Subgroup.id == global_spoc_subgroup_id)
+                    {
+                        $('#p_max_budget_edit').text("(Min Rs."+ 0 +"-Max Rs." + parseFloat(parseFloat(global_spoc_budget) + parseFloat(global_spoc_subgroup_unallocated)) + ")");
+
+                        $('#edit_budget').attr({
+                            "max" :  parseFloat(parseFloat(global_spoc_budget) + parseFloat(global_spoc_subgroup_unallocated)),
+                            "min" : 0
+                        });
+
+                        if(Subgroup.is_radio == '1')
+                        {
+                            if(global_spoc_is_radio == '0')
+                            {
+                                $('#edit_is_radio').closest('div').attr('aria-checked', false).removeClass('checked');
+                                $('#edit_radio_extra').val('');
+                            }
+                            else
+                            {
+                                $('#edit_is_radio').closest('div').attr('aria-checked', true).addClass('checked');
+                                $('#edit_radio_extra').val('Yes');
+                            }
+                            $('#is_radio_div_edit').show();
+                        }
+
+                        if(Subgroup.is_local == '1')
+                        {
+                            if(global_spoc_is_local == '0')
+                            {
+                                $('#edit_is_local').closest('div').attr('aria-checked', false).removeClass('checked');
+                                $('#edit_local_extra').val('');
+                            }
+                            else
+                            {
+                                $('#edit_is_local').closest('div').attr('aria-checked', true).addClass('checked');
+                                $('#edit_local_extra').val('Yes');
+                            }
+                            $('#is_local_div_edit').show();
+                        }
+                                
+                        if(Subgroup.is_outstation == '1')
+                        {
+                            if(global_spoc_is_outstation == '0')
+                            {
+                                $('#edit_is_outstation').closest('div').attr('aria-checked', false).removeClass('checked');
+                                $('#edit_outstation_extra').val('');
+                            }
+                            else
+                            {
+                                $('#edit_is_outstation').closest('div').attr('aria-checked', true).addClass('checked');
+                                $('#edit_outstation_extra').val('Yes');
+                            }
+                            $('#is_outstation_div_edit').show();
+                        }
+
+                        if(Subgroup.is_bus == '1')
+                        {
+                            if(global_spoc_is_bus == '0')
+                            {
+                                $('#edit_is_bus').closest('div').attr('aria-checked', false).removeClass('checked');
+                                $('#edit_bus_extra').val('');
+                            }
+                            else
+                            {
+                                $('#edit_is_bus').closest('div').attr('aria-checked', true).addClass('checked');
+                                $('#edit_bus_extra').val('Yes');
+                            }
+                            $('#is_bus_div_edit').show();
+                        }
+                    }
+                    else
+                    {
+                        $('#p_max_budget_edit').text("(Min Rs."+ 0 +"-Max Rs." + parseFloat(Subgroup.unallocated) + ")");
+                        $('#edit_budget').attr({
+                            "max" : parseFloat(Subgroup.unallocated),
+                            "min" : 0
+                        });
+
+                        if(Subgroup.is_radio == '1')
+                        {
+                            $('#edit_is_radio').closest('div').attr('aria-checked', false).removeClass('checked');
+                            $('#edit_radio_extra').val('');
+                            $('#is_radio_div_edit').show();
+                        }
+
+                        if(Subgroup.is_local == '1')
+                        {
+                            $('#edit_is_local').closest('div').attr('aria-checked', false).removeClass('checked');
+                            $('#edit_local_extra').val('');
+                            $('#is_local_div_edit').show();
+                        }
+                                
+                        if(Subgroup.is_outstation == '1')
+                        {
+                            $('#edit_is_outstation').closest('div').attr('aria-checked', false).removeClass('checked');
+                            $('#edit_outstation_extra').val('');
+                            $('#is_outstation_div_edit').show();
+                        }
+
+                        if(Subgroup.is_bus == '1')
+                        {
+                            $('#edit_is_bus').closest('div').attr('aria-checked', false).removeClass('checked');
+                            $('#edit_bus_extra').val('');
+                            $('#is_bus_div_edit').show();
+                        }
+                    }
+                }
+            },
+            error: function(data)
+            {
+            }
+        });
+    });
+
+    /*$('.email_check').keyup(function() {
+        $('span.error-keyup-7').remove();
+        var inputVal = $(this).val();
+        var emailReg = /^[a-z0-9]{2,}@tcs\.com$/;
+        if(!emailReg.test(inputVal)) {
+            $(this).after('<span class="error error-keyup-7">Invalid Email Format.</span>');
+        }
+    });
+
+    $("#add_spoc_form").submit(function() {
+        var inputVal = $('#email').val();
+        var pattern = /^[a-z0-9]{2,}@tcs\.com$/;
+        if (pattern.test(inputVal)) {
+            return true;
+        } else {
+            alert('Not a valid Email (TCS Only!!)');
+            return false;
+        }
+
+    });*/
+    
+});
+</script>
